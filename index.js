@@ -15,10 +15,20 @@ app.use(bodyParser.urlencoded({
   extended: true
 }));
 
-app.all('/*', function(req, res) {
-  console.info('HTTP ' + req.method + ' ' + req.path);
+function getParamsString(rawParams) {
+  let params = Object.keys(rawParams).reduce((acc, cur) => {
+    acc += cur + '=' + rawParams[cur] + '&';
+    return acc;
+  }, '?');
 
-  let params = '';
+  if (params) {
+    params = params.substring(0, params.length - 1);
+  }
+
+  return params;
+}
+
+app.all('/*', function(req, res) {
   let rawParams = {};
 
   if (req.method === 'GET') {
@@ -27,12 +37,9 @@ app.all('/*', function(req, res) {
     rawParams = req.body;
   }
 
-  Object.keys(rawParams).forEach(item => {
-    params += item + '=' + rawParams[item] + '&';
-  });
-  if (params.length > 0) {
-    params = '?' + params.substring(0, params.length - 1);
-  }
+  const params = getParamsString(rawParams);
+
+  console.info('HTTP ' + req.method + ' ' + req.path + ' ' + params);
 
   const filePath = path.join(apiDataPath, req.path + params + '.' + req.method + '.json');
   fs.readFile(filePath, function(err, data) {
