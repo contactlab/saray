@@ -1,13 +1,10 @@
 {
   "name": "api-stubber",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "ContactLab API stubber",
   "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "author": "",
-  "license": "ISC",
+  "author": "ContactLab Product Team",
+  "license": "Apache-2.0",
   "dependencies": {
     "body-parser": "^1.15.2",
     "express": "^4.14.0",
