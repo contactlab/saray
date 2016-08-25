@@ -16,16 +16,12 @@ app.use(bodyParser.urlencoded({
 }));
 
 function getParamsString(rawParams) {
-  let params = Object.keys(rawParams).reduce((acc, cur) => {
-    acc += cur + '=' + rawParams[cur] + '&';
-    return acc;
-  }, '?');
-
-  if (params) {
-    params = params.substring(0, params.length - 1);
-  }
-
-  return params;
+  return Object.keys(rawParams)
+    .reduce((acc, cur) => {
+      acc.push(cur + '=' + rawParams[cur]);
+      return acc;
+    }, [])
+    .join('&');
 }
 
 app.all('/*', function(req, res) {
@@ -37,17 +33,32 @@ app.all('/*', function(req, res) {
     rawParams = req.body;
   }
 
-  const params = getParamsString(rawParams);
+  const paramString = getParamsString(rawParams);
+  const params = paramString !== '' ? '?' + paramString : '';
 
   console.info('HTTP ' + req.method + ' ' + req.path + ' ' + params);
 
   const filePath = path.join(apiDataPath, req.path + params + '.' + req.method + '.json');
   fs.readFile(filePath, function(err, data) {
     if (err) {
-      res.status(404).send('Probably this is not the API response you are looking for');
+      res.status(404).json({
+        error: 'Probably this is not the API response you are looking for, missing JSON file for ' + req.path
+      });
       return;
     }
-    var obj = JSON.parse(data);
+    try {
+      var obj = JSON.parse(data);
+    } catch (e) {
+      if (e instanceof SyntaxError) {
+        res.status(500).json({
+          error: 'Hey, check your JSON for stubbed API at path ' + req.path + ' , probably it\'s malformed!'
+        });
+      } else {
+        res.status(500).json({
+          error: 'I\'m sorry, something went wrong!'
+        });
+      }
+    }
     res.json(obj);
   });
 });
