@@ -56,6 +56,11 @@ app.all('/*', function(req, res) {
 
   console.info('HTTP ' + req.method + ' ' + req.path + ' ' + params);
 
+  if (req.method === 'OPTIONS') {
+    res.json({});
+    return;
+  }
+
   const filePath = path.join(apiDataPath, req.path + params + '.' + req.method + '.json');
   fs.readFile(filePath, function(err, data) {
     if (err) {
