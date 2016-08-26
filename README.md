@@ -1,7 +1,9 @@
 # Saray
 
+[![Build Status](https://travis-ci.org/contactlab/saray.svg)](https://travis-ci.org/contactlab/saray)
+
 ```javascript
-    'Yet Another Rest API Stubber'.split(' ').reverse().map(item => item[0].toLowerCase()).join('')
+'Yet Another Rest API Stubber'.split(' ').reverse().map(item => item[0].toLowerCase()).join('')
 ```
 
 This is a simple API stubber for testing purposes.
@@ -49,4 +51,4 @@ Port is by default 8081 and data is `path.join(__dirname, 'data')`.
 
 ## Tests
 
-    $ npm tests
+    $ npm test
