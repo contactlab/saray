@@ -1,10 +1,15 @@
 {
-  "name": "api-stubber",
-  "version": "0.1.0",
+  "name": "staray",
+  "version": "1.0.0",
   "description": "ContactLab API stubber",
   "main": "index.js",
-  "author": "ContactLab Product Team",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/contactlab/saray"
+  },
+  "author": "Contactlab Product Team",
   "license": "Apache-2.0",
+  "homepage": "https://github.com/contactlab/saray#readme",
   "scripts": {
     "start": "node index.js",
     "test": "./node_modules/.bin/mocha -u exports test/**/*.js"

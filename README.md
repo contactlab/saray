@@ -1,4 +1,7 @@
-# ContactLab API Stubber
+# Saray
+
+    > 'Yet Another Rest API Stubber'.split(' ').reverse().map(item => item[0].toLowerCase()).join('')
+    <- "saray"
 
 This is a simple API stubber for testing purposes.
 
@@ -34,7 +37,7 @@ The same applies for the others `HTTP` methods.
 
 ## A note on HTTP POSTs
 
-This stubber has a basi support for POST requests, so the parameters should be
+This stubber has a basic support for POST requests, so the parameters should be
 very simple, similar to a GET request.
 
 ## How to run
@@ -42,6 +45,10 @@ very simple, similar to a GET request.
     $ node index.js --port=8081 --path=/path/to/data
 
 Port is by default 8081 and data is `path.join(__dirname, 'data')`.
+
+## Tests
+
+    $ npm tests
 
 ## TODOs
 
