@@ -10,22 +10,22 @@ app.use(bodyParser.urlencoded({
 }));
 
 app.use(function(req, res, next) {
-    // Website you wish to allow to connect
-    res.setHeader('Access-Control-Allow-Origin', '*');
+  // Website you wish to allow to connect
+  res.setHeader('Access-Control-Allow-Origin', '*');
 
-    // Request methods you wish to allow
-    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
+  // Request methods you wish to allow
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
 
-    // Request headers you wish to allow
-    res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+  // Request headers you wish to allow
+  res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
 
-    // Set to true if you need the website to include cookies in the requests sent
-    // to the API (e.g. in case you use sessions)
-    res.setHeader('Access-Control-Allow-Credentials', true);
+  // Set to true if you need the website to include cookies in the requests sent
+  // to the API (e.g. in case you use sessions)
+  res.setHeader('Access-Control-Allow-Credentials', true);
 
-    // Pass to next layer of middleware
-    next();
-  });
+  // Pass to next layer of middleware
+  next();
+});
 
 /**
  * Parse the process.argv array to extract required argv.
@@ -51,6 +51,7 @@ module.exports.apiDataPath = apiDataPath;
 
 /**
  * Parse an HTTP parameters object and convert it into a query string
+ *
  * @param  {Object} rawParams HTTP parameters object
  * @return {string}           the query string
  */
@@ -80,7 +81,7 @@ app.all('/*', function(req, res) {
 
   console.info('HTTP ' + req.method + ' ' + req.path + ' ' + params);
 
-  // OPTIONS calls don't check for a valid JSON file to load: they return
+  // OPTIONS calls don't check for a valid JSON file to load: they always return
   // a succesful empty JSON response
   if (req.method === 'OPTIONS') {
     res.json({});
@@ -95,6 +96,7 @@ app.all('/*', function(req, res) {
       });
       return;
     }
+
     try {
       var obj = JSON.parse(data);
     } catch (e) {
@@ -108,6 +110,7 @@ app.all('/*', function(req, res) {
         });
       }
     }
+    
     res.json(obj);
   });
 });
