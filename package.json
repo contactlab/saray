@@ -5,9 +5,19 @@
   "main": "index.js",
   "author": "ContactLab Product Team",
   "license": "Apache-2.0",
+  "scripts": {
+    "start": "node index.js",
+    "test": "./node_modules/.bin/mocha -u exports test/**/*.js"
+  },
   "dependencies": {
     "body-parser": "^1.15.2",
     "express": "^4.14.0",
     "express-json": "^1.0.0"
+  },
+  "devDependencies": {
+    "express-test": "^0.1.2",
+    "mocha": "^3.0.2",
+    "should": "^11.1.0",
+    "supertest": "^2.0.0"
   }
 }

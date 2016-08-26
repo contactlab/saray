@@ -4,18 +4,12 @@ const fs = require('fs');
 const path = require('path');
 const bodyParser = require('body-parser');
 
-const portArgv = process.argv.filter(item => item.indexOf('port=') !== -1);
-const port = portArgv[0] ? portArgv[0].split('=')[1] : 8081;
-
-const apiDataPathArgv = process.argv.filter(item => item.indexOf('path=') !== -1);
-const apiDataPath = apiDataPathArgv[0] ? apiDataPathArgv[0].split('=')[1] : path.join(__dirname, 'data');
-
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({
   extended: true
 }));
 
-app.use(function (req, res, next) {
+app.use(function(req, res, next) {
     // Website you wish to allow to connect
     res.setHeader('Access-Control-Allow-Origin', '*');
 
@@ -33,18 +27,48 @@ app.use(function (req, res, next) {
     next();
   });
 
-function getParamsString(rawParams) {
+/**
+ * Parse the process.argv array to extract required argv.
+ * Parameters must be in the form of
+ *   param1=value1 param2=value2
+ *
+ * @param  {array} processArgv  The process.argv array
+ * @param  {string} argv        argument name
+ * @param  {string} default_    default argument if required argument is not defined
+ * @return {mixed}              the argument value or default_
+ */
+const getArgvValue = function(processArgv, argv, default_) {
+  const argv_ = processArgv.filter(item => item.indexOf(argv + '=') !== -1);
+  return argv_[0] ? argv_[0].split('=')[1] : default_;
+}
+module.exports.getArgvValue = getArgvValue;
+
+const port = getArgvValue(process.argv, 'port', 8081);
+module.exports.port = port;
+
+const apiDataPath = getArgvValue(process.argv, 'path', path.join(__dirname, 'data'));
+module.exports.apiDataPath = apiDataPath;
+
+/**
+ * Parse an HTTP parameters object and convert it into a query string
+ * @param  {Object} rawParams HTTP parameters object
+ * @return {string}           the query string
+ */
+const getParamsString = function(rawParams) {
   return Object.keys(rawParams)
     .reduce((acc, cur) => {
       acc.push(cur + '=' + rawParams[cur]);
       return acc;
     }, [])
     .join('&');
-}
+};
+module.exports.getParamsString = getParamsString;
 
 app.all('/*', function(req, res) {
   let rawParams = {};
 
+  // GET and POST parameters object are the same, but they are in different
+  // request properties
   if (req.method === 'GET') {
     rawParams = req.query
   } else if (req.method === 'POST') {
@@ -56,12 +80,14 @@ app.all('/*', function(req, res) {
 
   console.info('HTTP ' + req.method + ' ' + req.path + ' ' + params);
 
+  // OPTIONS calls don't check for a valid JSON file to load: they return
+  // a succesful empty JSON response
   if (req.method === 'OPTIONS') {
     res.json({});
     return;
   }
 
-  const filePath = path.join(apiDataPath, req.path + params + '.' + req.method + '.json');
+  const filePath = path.join(module.exports.apiDataPath, req.path + params + '.' + req.method + '.json');
   fs.readFile(filePath, function(err, data) {
     if (err) {
       res.status(404).json({
@@ -87,5 +113,7 @@ app.all('/*', function(req, res) {
 });
 
 app.listen(port, function() {
-  console.log('ContactLab API stubber listening on port ' + port + ' using path ' + apiDataPath);
+  console.log('ContactLab API stubber listening on port ' + port + ' using path ' + module.exports.apiDataPath);
 });
+
+module.exports.app = app;
