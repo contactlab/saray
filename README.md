@@ -44,8 +44,8 @@ This stubber has a basic support for POST requests, so the parameters should be
 very simple, similar to a GET request.
 
 ## How to run
-
-    $ node index.js --port=8081 --path=/path/to/data
+    $ npm install -g saray
+    $ saray --port=8081 --path=/path/to/data
 
 Port is by default 8081 and data is `path.join(__dirname, 'data')`.
 

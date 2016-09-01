@@ -1,3 +1,5 @@
+#! /usr/bin/env node
+
 const express = require('express');
 const app = express();
 const fs = require('fs');
@@ -110,7 +112,7 @@ app.all('/*', function(req, res) {
         });
       }
     }
-    
+
     res.json(obj);
   });
 });
