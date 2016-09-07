@@ -16,9 +16,12 @@
   ],
   "author": "Contactlab Product Team",
   "license": "Apache-2.0",
+  "bin": {
+    "saray": "./index.js"
+  },
   "homepage": "https://github.com/contactlab/saray#readme",
   "scripts": {
-    "start": "node index.js",
+    "start": "saray",
     "test": "./node_modules/.bin/mocha -u exports test/**/*.js"
   },
   "dependencies": {
