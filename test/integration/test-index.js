@@ -81,10 +81,20 @@ describe('Integration', function() {
       .end(done);
   });
 
-  it('HTTP OPTIONS call', function(done) {
+  it('HTTP OPTIONS call to a wrong address', function(done) {
     supertest(app.app)
       .options('/generic/options')
-      .expect(200)
+      .expect(404)
       .end(done);
+  });
+
+  it('HTTP OPTIONS call to a right address', function(done) {
+    supertest(app.app)
+      .options('/call')
+      .expect(200)
+      .end(function(err, response) {
+        assert.ok(!err);
+        return done();
+      });
   });
 });

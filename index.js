@@ -5,6 +5,7 @@ const app = express();
 const fs = require('fs');
 const path = require('path');
 const bodyParser = require('body-parser');
+const allowedMethods = ['GET', 'POST', 'OPTIONS', 'PUT', 'PATCH', 'DELETE'];
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({
@@ -16,7 +17,7 @@ app.use(function(req, res, next) {
   res.setHeader('Access-Control-Allow-Origin', '*');
 
   // Request methods you wish to allow
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
+  res.setHeader('Access-Control-Allow-Methods', allowedMethods.join(', '));
 
   // Request headers you wish to allow
   res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
@@ -83,10 +84,21 @@ app.all('/*', function(req, res) {
 
   console.info('HTTP ' + req.method + ' ' + req.path + ' ' + params);
 
-  // OPTIONS calls don't check for a valid JSON file to load: they always return
-  // a succesful empty JSON response
   if (req.method === 'OPTIONS') {
-    res.json({});
+    let methods = [];
+    allowedMethods.forEach(function(method) {
+      let filePath = path.join(module.exports.apiDataPath, req.path + params + '.' + method + '.json');
+      if(fs.existsSync(filePath)) {
+        methods.push(method);
+      }
+    });
+    if(methods.length) {
+      res.setHeader('Access-Control-Allow-Methods', methods.join(', '));
+      res.send(methods);
+    } else {
+      res.setHeader('Access-Control-Allow-Methods', '');
+      res.status(404).send();
+    }
     return;
   }
 
