@@ -81,7 +81,7 @@ describe('Integration', function() {
       .end(done);
   });
 
-  it('HTTP OPTIONS call to a wront address', function(done) {
+  it('HTTP OPTIONS call to a wrong address', function(done) {
     supertest(app.app)
       .options('/generic/options')
       .expect(404)
