@@ -5,7 +5,7 @@ const app = express();
 const fs = require('fs');
 const path = require('path');
 const bodyParser = require('body-parser');
-const allowedMethods = ['GET', 'POST'];
+const allowedMethods = ['GET', 'POST', 'OPTIONS', 'PUT', 'PATCH', 'DELETE'];
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({
