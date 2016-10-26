@@ -80,11 +80,10 @@ app.all('/*', function(req, res) {
   console.info('HTTP ' + req.method + ' ' + req.path + ' ' + params);
 
   if (req.method === 'OPTIONS') {
-    let methods = [];
-    allowedMethods.forEach(function(method) {
-      let filePath = path.join(module.exports.apiDataPath, req.path + params + '.' + method + '.json');
+    const methods = allowedMethods.filter(function(method) {
+      const filePath = path.join(module.exports.apiDataPath, req.path + params + '.' + method + '.json');
       if(fs.existsSync(filePath)) {
-        methods.push(method);
+        return method;
       }
     });
     if(methods.length) {
