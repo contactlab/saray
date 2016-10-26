@@ -19,18 +19,4 @@ describe('Unit tests', function() {
     assert.strictEqual(paramsString, '');
     assert.notStrictEqual(paramsString, false);
   });
-
-  it('Should parse correctly command arguments', function() {
-    const fakeArgv = ['param1=value1', 'param2=value2'];
-    const value = app.getArgvValue(fakeArgv, 'param2', 'defaultValue');
-
-    assert.strictEqual(value, 'value2');
-  });
-
-  it('Should parse correctly command arguments on undefined parameter', function() {
-    const fakeArgv = ['param1=value1', 'param2=value2'];
-    const value = app.getArgvValue(fakeArgv, 'param3', 'defaultValue');
-
-    assert.strictEqual(value, 'defaultValue');
-  });
 });

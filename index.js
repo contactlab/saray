@@ -5,7 +5,18 @@ const app = express();
 const fs = require('fs');
 const path = require('path');
 const bodyParser = require('body-parser');
+const program = require('commander');
+
 const allowedMethods = ['GET', 'POST', 'OPTIONS', 'PUT', 'PATCH', 'DELETE'];
+const DEFAULT_PORT = 8081;
+const DEFAULT_PATH = path.join(__dirname, 'data');
+
+program
+  .version('1.1.1')
+  .description("Yet Another Rest API Stubber'.split(' ').reverse().map(item => item[0].toLowerCase()).join('')")
+  .option('--port <port>', 'The port to listen to', DEFAULT_PORT)
+  .option('--path <password>', 'The path for stubbed data', DEFAULT_PATH)
+  .parse(process.argv);
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({
@@ -30,26 +41,10 @@ app.use(function(req, res, next) {
   next();
 });
 
-/**
- * Parse the process.argv array to extract required argv.
- * Parameters must be in the form of
- *   param1=value1 param2=value2
- *
- * @param  {array} processArgv  The process.argv array
- * @param  {string} argv        argument name
- * @param  {string} default_    default argument if required argument is not defined
- * @return {mixed}              the argument value or default_
- */
-const getArgvValue = function(processArgv, argv, default_) {
-  const argv_ = processArgv.filter(item => item.indexOf(argv + '=') !== -1);
-  return argv_[0] ? argv_[0].split('=')[1] : default_;
-}
-module.exports.getArgvValue = getArgvValue;
-
-const port = getArgvValue(process.argv, 'port', 8081);
+const port = program.port;
 module.exports.port = port;
 
-const apiDataPath = getArgvValue(process.argv, 'path', path.join(__dirname, 'data'));
+const apiDataPath = program.path;
 module.exports.apiDataPath = apiDataPath;
 
 /**
