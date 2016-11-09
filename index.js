@@ -92,14 +92,20 @@ app.use(function(req, res, next) {
       next();
     } else {
       res.set('Saray-Stubbed', false);
-      fetch(endpoint + req.path, {
+      const opts = {
         method: req.method,
         headers: {
           'Accept': req.headers.accept,
           'Authorization': req.headers.authorization,
           'Content-type': req.headers['content-type']
-        },
-      }).then(function(response) {
+        }
+      };
+
+      if (req.method === 'POST' || req.method === 'PATCH') {
+        opts.body = JSON.stringify(req.body);
+      }
+
+      fetch(endpoint + req.path, opts).then(function(response) {
         const contentType = response.headers.get('content-type');
         if (contentType) {
           res.set('Content-type', response.headers.get('content-type'));
