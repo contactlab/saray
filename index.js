@@ -88,8 +88,10 @@ app.use(function(req, res, next) {
     const params = getQueryString(req);
     const allowedMethods = reallyAllowedMethods(req, params);
     if (allowedMethods.length && !program.epfirst) {
+      res.set('Saray-Stubbed', true);
       next();
     } else {
+      res.set('Saray-Stubbed', false);
       fetch(endpoint + req.path, {
         method: req.method,
         headers: {
