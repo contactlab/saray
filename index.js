@@ -19,7 +19,7 @@ program
   .option('--port <port>', 'The port to listen to', DEFAULT_PORT)
   .option('--path <password>', 'The path for stubbed data', DEFAULT_PATH)
   .option('--endpoint <endpoint>', 'The endpoint', null)
-  .option('--epfirst', 'Use only if you want to yield to endpoint', false)
+  .option('--prefer-api', 'Prefer API enpoint to stubbed data', false)
   .parse(process.argv);
 
 app.use(bodyParser.json());
@@ -87,7 +87,7 @@ app.use(function(req, res, next) {
   if (endpoint !== null) {
     const params = getQueryString(req);
     const allowedMethods = reallyAllowedMethods(req, params);
-    if (allowedMethods.length && !program.epfirst) {
+    if (allowedMethods.length && !program.preferApi) {
       res.set('Saray-Stubbed', true);
       next();
     } else {
@@ -174,7 +174,16 @@ app.all('/*', function(req, res) {
 });
 
 app.listen(port, function() {
-  console.log('ContactLab API stubber listening on port ' + port + ' using path ' + module.exports.apiDataPath);
+  let message = 'ContactLab API stubber listening on port ' + port + '\nreading from path ' + module.exports.apiDataPath;
+  if (program.endpoint) {
+    message += '\nusing endpoint ' + program.endpoint;
+  }
+  if (program.preferApi) {
+    message += '\npreferring API endpoint over stub';
+  } else {
+    message += '\npreferring stub over API endpoint';
+  }
+  console.log(message);
 });
 
 module.exports.app = app;
