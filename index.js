@@ -19,7 +19,7 @@ program
   .option('--port <port>', 'The port to listen to', DEFAULT_PORT)
   .option('--path <password>', 'The path for stubbed data', DEFAULT_PATH)
   .option('--endpoint <endpoint>', 'The endpoint', null)
-  .option('--prefer-api', 'Prefer API enpoint to stubbed data', false)
+  .option('--pfer-api, --prefer-api', 'Prefer API enpoint to stubbed data', false)
   .parse(process.argv);
 
 app.use(bodyParser.json());
@@ -92,13 +92,12 @@ app.use(function(req, res, next) {
       next();
     } else {
       res.set('Saray-Stubbed', false);
+
+      const headers = Object.assign({}, req.headers);
+      delete headers.host;
       const opts = {
         method: req.method,
-        headers: {
-          'Accept': req.headers.accept,
-          'Authorization': req.headers.authorization,
-          'Content-type': req.headers['content-type']
-        }
+        headers: headers
       };
 
       if (req.method === 'POST' || req.method === 'PATCH') {
