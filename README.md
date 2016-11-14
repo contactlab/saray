@@ -43,13 +43,37 @@ The same applies for the others `HTTP` methods.
 This stubber has a basic support for POST requests, so the parameters should be
 very simple, similar to a GET request.
 
+## Enpoint integration
+
+Saray can operate as a proxy between the client and your api endpoint. So, if you define
+an endpoint, saray can redirect your calls without stubbed data directly to your real APIs.
+Using the parameter '--prefer-api', you can tell Saray to prefer real APis instead of stubbed data.
+
 ## How to run
 ```bash
 $ npm install -g saray
-$ saray --port=8081 --path=/path/to/data
+$ saray --port 8081 --path /path/to/data --endpoint 'https://myapis.com' --prefer-api
 ```
 
-Port is by default 8081 and data is `path.join(__dirname, 'data')`.
+Port is by default 8081, path is `path.join(__dirname, 'data')`, endpoint is null and prefer-api is false.
+
+## Help
+```bash
+$ saray --help
+
+  Usage: index [options]
+
+  'Yet Another Rest API Stubber'.split(' ').reverse().map(item => item[0].toLowerCase()).join('')
+
+  Options:
+
+    -h, --help                output usage information
+    -V, --version             output the version number
+    --port <port>             The port to listen to (default: 8081)
+    --path <password>         The path for stubbed data (default ./data)
+    --endpoint <endpoint>     The endpoint (default null)
+    --pfer-api, --prefer-api  Prefer API enpoint to stubbed data (default: false)
+```
 
 ## Tests
 
