@@ -1,11 +1,13 @@
 #! /usr/bin/env node
 
+const bodyParser = require('body-parser');
 const express = require('express');
-const app = express();
+const fetch = require('node-fetch');
 const fs = require('fs');
 const path = require('path');
-const bodyParser = require('body-parser');
 const program = require('commander');
+
+const app = express();
 
 const allowedMethods = ['GET', 'POST', 'OPTIONS', 'PUT', 'PATCH', 'DELETE'];
 const DEFAULT_PORT = 8081;
@@ -13,9 +15,11 @@ const DEFAULT_PATH = path.join(__dirname, 'data');
 
 program
   .version('1.1.1')
-  .description("Yet Another Rest API Stubber'.split(' ').reverse().map(item => item[0].toLowerCase()).join('')")
-  .option('--port <port>', 'The port to listen to', DEFAULT_PORT)
-  .option('--path <password>', 'The path for stubbed data', DEFAULT_PATH)
+  .description("'Yet Another Rest API Stubber'.split(' ').reverse().map(item => item[0].toLowerCase()).join('')")
+  .option('--port <port>', 'The port to listen to (default: 8081)', DEFAULT_PORT)
+  .option('--path <password>', 'The path for stubbed data (default ./data)', DEFAULT_PATH)
+  .option('--endpoint <endpoint>', 'The endpoint (default null)', null)
+  .option('--pfer-api, --prefer-api', 'Prefer API enpoint to stubbed data (default: false)', false)
   .parse(process.argv);
 
 app.use(bodyParser.json());
@@ -24,28 +28,15 @@ app.use(bodyParser.urlencoded({
 }));
 
 app.use(function(req, res, next) {
-  // Website you wish to allow to connect
   res.setHeader('Access-Control-Allow-Origin', '*');
-
-  // Request methods you wish to allow
   res.setHeader('Access-Control-Allow-Methods', allowedMethods.join(', '));
-
-  // Request headers you wish to allow
   res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
-
   // Set to true if you need the website to include cookies in the requests sent
   // to the API (e.g. in case you use sessions)
   res.setHeader('Access-Control-Allow-Credentials', true);
 
-  // Pass to next layer of middleware
   next();
 });
-
-const port = program.port;
-module.exports.port = port;
-
-const apiDataPath = program.path;
-module.exports.apiDataPath = apiDataPath;
 
 /**
  * Parse an HTTP parameters object and convert it into a query string
@@ -63,7 +54,7 @@ const getParamsString = function(rawParams) {
 };
 module.exports.getParamsString = getParamsString;
 
-app.all('/*', function(req, res) {
+function getQueryString(req) {
   let rawParams = {};
 
   // GET and POST parameters object are the same, but they are in different
@@ -76,16 +67,74 @@ app.all('/*', function(req, res) {
 
   const paramString = getParamsString(rawParams);
   const params = paramString !== '' ? '?' + paramString : '';
+  return params;
+}
+module.exports.getQueryString = getQueryString;
+
+function reallyAllowedMethods(req, params) {
+  return allowedMethods.filter(function(method) {
+    const filePath = path.join(module.exports.apiDataPath, req.path + params + '.' + method + '.json');
+    if(fs.existsSync(filePath)) {
+      return method;
+    }
+  });
+}
+module.exports.reallyAllowedMethods = reallyAllowedMethods;
+
+app.use(function(req, res, next) {
+  const endpoint = program.endpoint;
+
+  if (endpoint !== null) {
+    const params = getQueryString(req);
+    const allowedMethods = reallyAllowedMethods(req, params);
+    if (allowedMethods.length && !program.preferApi) {
+      res.set('Saray-Stubbed', true);
+      next();
+    } else {
+      res.set('Saray-Stubbed', false);
+
+      const headers = Object.assign({}, req.headers);
+      delete headers.host;
+      const opts = {
+        method: req.method,
+        headers: headers
+      };
+
+      if (req.method === 'POST' || req.method === 'PATCH') {
+        opts.body = JSON.stringify(req.body);
+      }
+
+      fetch(endpoint + req.path, opts).then(function(response) {
+        const contentType = response.headers.get('content-type');
+        if (contentType) {
+          res.set('Content-type', response.headers.get('content-type'));
+        }
+        return response.text();
+      }).then(function(text) {
+        res.send(text);
+      }).catch(function(response) {
+        console.log(response);
+        res.sendStatus(404);
+      });
+    }
+  } else {
+    next();
+  }
+});
+
+const port = program.port;
+module.exports.port = port;
+
+const apiDataPath = program.path;
+module.exports.apiDataPath = apiDataPath;
+
+app.all('/*', function(req, res) {
+  const params = getQueryString(req);
 
   console.info('HTTP ' + req.method + ' ' + req.path + ' ' + params);
 
   if (req.method === 'OPTIONS') {
-    const methods = allowedMethods.filter(function(method) {
-      const filePath = path.join(module.exports.apiDataPath, req.path + params + '.' + method + '.json');
-      if(fs.existsSync(filePath)) {
-        return method;
-      }
-    });
+    const methods = reallyAllowedMethods(req, params);
     if(methods.length) {
       res.setHeader('Access-Control-Allow-Methods', methods.join(', '));
       res.send(methods);
@@ -124,7 +173,16 @@ app.all('/*', function(req, res) {
 });
 
 app.listen(port, function() {
-  console.log('ContactLab API stubber listening on port ' + port + ' using path ' + module.exports.apiDataPath);
+  let message = 'ContactLab API stubber listening on port ' + port + '\nreading from path ' + module.exports.apiDataPath;
+  if (program.endpoint) {
+    message += '\nusing endpoint ' + program.endpoint;
+  }
+  if (program.preferApi) {
+    message += '\npreferring API endpoint over stub';
+  } else {
+    message += '\npreferring stub over API endpoint';
+  }
+  console.log(message);
 });
 
 module.exports.app = app;
