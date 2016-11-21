@@ -131,13 +131,14 @@ app.use(function(req, res, next) {
         opts.body = JSON.stringify(req.body);
       }
 
-      log.info(`Fetching API call ${req.method} ${req.path} from ${endpoint}`);
-      fetch(endpoint + req.path, opts).then(function(response) {
+      const strippedPath = stripRootPath(module.exports.rootPath, req.path);
+      log.info(`Fetching API call ${req.method} ${strippedPath} from ${endpoint}`);
+      fetch(endpoint + strippedPath, opts).then(function(response) {
         const contentType = response.headers.get('content-type');
         if (contentType) {
           res.set('Content-type', response.headers.get('content-type'));
         }
-        log.info(`Fetched API call ${req.method} ${req.path} from ${endpoint} with status ${response.status}`);
+        log.info(`Fetched API call ${req.method} ${strippedPath} from ${endpoint} with status ${response.status}`);
         return response.text();
       }).then(function(text) {
         res.send(text);
