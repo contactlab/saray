@@ -14,6 +14,7 @@ const allowedMethods = ['GET', 'POST', 'OPTIONS', 'PUT', 'PATCH', 'DELETE'];
 const DEFAULT_PORT = 8081;
 const DEFAULT_PATH = path.join(__dirname, 'data');
 const DEFAULT_LOG_PATH = path.join(__dirname, 'saray.log');
+const DEFAULT_ROOT_PATH = '';
 
 program
   .version('1.4.0')
@@ -23,6 +24,7 @@ program
   .option('--endpoint <endpoint>', 'The endpoint (default null)', null)
   .option('--pfer-api, --prefer-api', 'Prefer API enpoint to stubbed data (default: false)', false)
   .option('--log <log_path>', 'Log file path', DEFAULT_LOG_PATH)
+  .option('--root <root_path>', 'The base root path (default: empty)', DEFAULT_ROOT_PATH)
   .parse(process.argv);
 
 const log = bunyan.createLogger({
@@ -31,6 +33,12 @@ const log = bunyan.createLogger({
     path: program.log,
   }]
 });
+
+const rootPath = program.root;
+module.exports.rootPath = rootPath;
+
+const sarayRouter = express.Router();
+module.exports.sarayRouter = sarayRouter;
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({
@@ -64,7 +72,7 @@ const getParamsString = function(rawParams) {
 };
 module.exports.getParamsString = getParamsString;
 
-function getQueryString(req) {
+const getQueryString = function(req) {
   let rawParams = {};
 
   // GET and POST parameters object are the same, but they are in different
@@ -81,9 +89,16 @@ function getQueryString(req) {
 }
 module.exports.getQueryString = getQueryString;
 
-function reallyAllowedMethods(req, params) {
+const stripRootPath = function(rootPath, requestPath) {
+  const regexp = new RegExp('^' + rootPath);
+  return requestPath.replace(regexp, '');
+}
+module.exports.stripRootPath = stripRootPath;
+
+const reallyAllowedMethods = function(req, params) {
   return allowedMethods.filter(function(method) {
-    const filePath = path.join(module.exports.apiDataPath, req.path + params + '.' + method + '.json');
+    strippedPath = stripRootPath(module.exports.rootPath, req.path);
+    const filePath = path.join(module.exports.apiDataPath, strippedPath + params + '.' + method + '.json');
     if(fs.existsSync(filePath)) {
       return method;
     }
@@ -144,7 +159,7 @@ module.exports.port = port;
 const apiDataPath = program.path;
 module.exports.apiDataPath = apiDataPath;
 
-app.all('/*', function(req, res) {
+sarayRouter.all('/*', function(req, res) {
   const params = getQueryString(req);
 
   if (req.method === 'OPTIONS') {
@@ -159,7 +174,8 @@ app.all('/*', function(req, res) {
     return;
   }
 
-  const filePath = path.join(module.exports.apiDataPath, req.path + params + '.' + req.method + '.json');
+  strippedPath = stripRootPath(module.exports.rootPath, req.path);
+  const filePath = path.join(module.exports.apiDataPath, strippedPath + params + '.' + req.method + '.json');
   log.info(`Loading data from ${filePath}`);
   fs.readFile(filePath, function(err, data) {
     if (err) {
@@ -191,8 +207,12 @@ app.all('/*', function(req, res) {
   });
 });
 
+app.use(module.exports.rootPath, sarayRouter);
+
 app.listen(port, function() {
-  let message = 'ContactLab API stubber listening on port ' + port + '\nreading from path ' + module.exports.apiDataPath;
+  let message = 'ContactLab API stubber listening on port ' + port +
+    '\nreading from path ' + module.exports.apiDataPath +
+    '\nusing base path ' + module.exports.rootPath;
   if (program.endpoint) {
     message += '\nusing endpoint ' + program.endpoint;
   }

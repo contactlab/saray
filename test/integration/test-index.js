@@ -98,3 +98,101 @@ describe('Integration', function() {
       });
   });
 });
+
+describe('Integration with rootPath', function() {
+  before(function() {
+    app.apiDataPath = path.join(__dirname, '..', 'data');
+    app.rootPath = '/saray/abc';
+    app.app.use(app.rootPath, app.sarayRouter);
+  });
+
+  it('HTTP GET call to a wrong address', function(done) {
+    supertest(app.app)
+      .get('/saray/abc/wrong')
+      .expect(404)
+      .end(done);
+  });
+
+  it('HTTP GET call to a right address', function(done) {
+    supertest(app.app)
+      .get('/saray/abc/call')
+      .expect(200)
+      .end(function(err, response) {
+        assert.ok(!err);
+        assert.ok(response.body.key === 'value');
+        return done();
+      });
+  });
+
+  it('HTTP GET call to a right address with parameters', function(done) {
+    supertest(app.app)
+      .get('/saray/abc/call?param1=value1')
+      .expect(200)
+      .end(function(err, response) {
+        assert.ok(!err);
+        assert.ok(response.body.keyWithParam === 'value');
+        return done();
+      });
+  });
+
+  it('HTTP GET call to a malformed JSON', function(done) {
+    supertest(app.app)
+      .get('/saray/abc/malformed')
+      .expect(500)
+      .end(done);
+  });
+
+  it('HTTP POST call to a wrong address', function(done) {
+    supertest(app.app)
+      .post('/saray/abc/wrong')
+      .expect(404)
+      .end(done);
+  });
+
+  it('HTTP POST call to a right address', function(done) {
+    supertest(app.app)
+      .post('/saray/abc/call')
+      .expect(200)
+      .end(function(err, response) {
+        assert.ok(!err);
+        assert.ok(response.body.keyPOST === 'value');
+        return done();
+      });
+  });
+
+  it('HTTP POST call to a right address with parameters', function(done) {
+    supertest(app.app)
+      .post('/saray/abc/call')
+      .send({param1: 'value1'})
+      .expect(200)
+      .end(function(err, response) {
+        assert.ok(!err);
+        assert.ok(response.body.keyWithParamPOST === 'value');
+        return done();
+      });
+  });
+
+  it('HTTP POST call to a malformed JSON', function(done) {
+    supertest(app.app)
+      .post('/saray/abc/malformed')
+      .expect(500)
+      .end(done);
+  });
+
+  it('HTTP OPTIONS call to a wrong address', function(done) {
+    supertest(app.app)
+      .options('/saray/abc/generic/options')
+      .expect(404)
+      .end(done);
+  });
+
+  it('HTTP OPTIONS call to a right address', function(done) {
+    supertest(app.app)
+      .options('/saray/abc/call')
+      .expect(200)
+      .end(function(err, response) {
+        assert.ok(!err);
+        return done();
+      });
+  });
+});
