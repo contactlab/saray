@@ -139,6 +139,7 @@ app.use(function(req, res, next) {
           res.set('Content-type', response.headers.get('content-type'));
         }
         log.info(`Fetched API call ${req.method} ${strippedPath} from ${endpoint} with status ${response.status}`);
+        res.status(response.status);
         return response.text();
       }).then(function(text) {
         res.send(text);
