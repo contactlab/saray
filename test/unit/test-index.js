@@ -65,4 +65,13 @@ describe('Unit tests', function() {
 
     assert.equal(queryString, '');
   });
+
+  it('Should strip correctly root path from filesystem path', function() {
+    const path1 = app.stripRootPath('/paolo', '/paolo/v1/me');
+    const path2 = app.stripRootPath('/paolo', '/v1/me/paolo');
+    const path3 = app.stripRootPath('/paolo', '/v1/paolo/me');
+    assert.equal(path1, '/v1/me');
+    assert.equal(path2, '/v1/me/paolo');
+    assert.equal(path3, '/v1/paolo/me');
+  });
 });
