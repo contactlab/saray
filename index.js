@@ -6,6 +6,7 @@ const express = require('express');
 const fetch = require('node-fetch');
 const fs = require('fs');
 const path = require('path');
+const process = require('process');
 const program = require('commander');
 
 const app = express();
@@ -17,7 +18,7 @@ const DEFAULT_LOG_PATH = path.join(__dirname, 'saray.log');
 const DEFAULT_ROOT_PATH = '';
 
 program
-  .version('1.4.0')
+  .version('1.5.0-beta')
   .description("'Yet Another Rest API Stubber'.split(' ').reverse().map(item => item[0].toLowerCase()).join('')")
   .option('--port <port>', 'The port to listen to (default: 8081)', DEFAULT_PORT)
   .option('--path <password>', 'The path for stubbed data (default ./data)', DEFAULT_PATH)
@@ -211,20 +212,35 @@ sarayRouter.all('/*', function(req, res) {
 
 app.use(module.exports.rootPath, sarayRouter);
 
-app.listen(port, function() {
-  let message = 'ContactLab API stubber listening on port ' + port +
+function main() {
+  const version = parseFloat(process.version.replace('v', ''));
+
+  let message = '';
+
+  if (version < 6) {
+    message = 'Your Node.js version is not supported. You must install Node.js >= 6.0';
+    console.log(message);
+    log.info(message);
+    return;
+  }
+
+  app.listen(port, function() {
+    message = 'ContactLab API stubber listening on port ' + port +
     '\nreading from path ' + module.exports.apiDataPath +
     '\nusing base path ' + module.exports.rootPath;
-  if (program.endpoint) {
-    message += '\nusing endpoint ' + program.endpoint;
-  }
-  if (program.preferApi) {
-    message += '\npreferring API endpoint over stub';
-  } else {
-    message += '\npreferring stub over API endpoint';
-  }
-  console.log(message);
-  log.info(message);
-});
+    if (program.endpoint) {
+      message += '\nusing endpoint ' + program.endpoint;
+    }
+    if (program.preferApi) {
+      message += '\npreferring API endpoint over stub';
+    } else {
+      message += '\npreferring stub over API endpoint';
+    }
+    console.log(message);
+    log.info(message);
+  });
+}
+
+main();
 
 module.exports.app = app;
