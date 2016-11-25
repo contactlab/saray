@@ -13,7 +13,7 @@ const app = express();
 
 const allowedMethods = ['GET', 'POST', 'OPTIONS', 'PUT', 'PATCH', 'DELETE'];
 const DEFAULT_PORT = 8081;
-const DEFAULT_PATH = path.join(__dirname, 'data');
+const DEFAULT_PATH = path.join(process.cwd(), 'data');
 const DEFAULT_LOG_PATH = path.join(__dirname, 'saray.log');
 const DEFAULT_ROOT_PATH = '';
 
@@ -169,7 +169,7 @@ app.use(function(req, res, next) {
 const port = program.port;
 module.exports.port = port;
 
-const apiDataPath = program.path;
+const apiDataPath = path.resolve(program.path);
 module.exports.apiDataPath = apiDataPath;
 
 sarayRouter.all('/*', function(req, res) {
