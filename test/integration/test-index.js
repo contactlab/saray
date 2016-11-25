@@ -92,7 +92,27 @@ describe('Integration', function() {
     supertest(app.app)
       .options('/call')
       .expect(200)
-      .end(function(err, response) {
+      .end(function(err) {
+        assert.ok(!err);
+        return done();
+      });
+  });
+
+  it('HTTP OPTIONS call to a right address with params', function(done) {
+    supertest(app.app)
+      .options('/call2?param1=value1')
+      .expect(200)
+      .end(function(err) {
+        assert.ok(!err);
+        return done();
+      });
+  });
+
+  it('HTTP OPTIONS call to a right address with params 2', function(done) {
+    supertest(app.app)
+      .options('/call3?param1=value1')
+      .expect(200)
+      .end(function(err) {
         assert.ok(!err);
         return done();
       });

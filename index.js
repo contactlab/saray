@@ -78,8 +78,8 @@ const getQueryString = function(req) {
 
   // GET and POST parameters object are the same, but they are in different
   // request properties
-  if (req.method === 'GET') {
-    rawParams = req.query
+  if (req.method === 'GET' || req.method === 'OPTIONS') {
+    rawParams = req.query;
   } else if (req.method === 'POST') {
     rawParams = req.body;
   }
@@ -87,24 +87,34 @@ const getQueryString = function(req) {
   const paramString = getParamsString(rawParams);
   const params = paramString !== '' ? '?' + paramString : '';
   return params;
-}
+};
 module.exports.getQueryString = getQueryString;
 
 const stripRootPath = function(rootPath, requestPath) {
   const regexp = new RegExp('^' + rootPath);
   return requestPath.replace(regexp, '');
-}
+};
 module.exports.stripRootPath = stripRootPath;
 
 const reallyAllowedMethods = function(req, params) {
   return allowedMethods.filter(function(method) {
-    strippedPath = stripRootPath(module.exports.rootPath, req.path);
-    const filePath = path.join(module.exports.apiDataPath, strippedPath + params + '.' + method + '.json');
-    if(fs.existsSync(filePath)) {
-      return method;
-    }
+    const strippedPath = stripRootPath(module.exports.rootPath, req.path);
+    
+    // Here we need to consider paths that have both parameters and not
+    const filePaths = [
+      path.join(module.exports.apiDataPath, strippedPath + params + '.' + method + '.json'),
+      path.join(module.exports.apiDataPath, strippedPath + '.' + method + '.json')
+    ];
+
+    return filePaths.reduce(function(acc, cur) {
+      if(fs.existsSync(cur)) {
+        return method;
+      } else {
+        return acc;
+      }
+    }, '');
   });
-}
+};
 module.exports.reallyAllowedMethods = reallyAllowedMethods;
 
 app.use(function(req, res, next) {
@@ -144,7 +154,7 @@ app.use(function(req, res, next) {
         return response.text();
       }).then(function(text) {
         res.send(text);
-      }).catch(function(response) {
+      }).catch(function() {
         log.info(`Error with API call ${req.method} ${req.path} from ${endpoint}`);
         res.sendStatus(404);
       });
@@ -177,7 +187,7 @@ sarayRouter.all('/*', function(req, res) {
     return;
   }
 
-  strippedPath = stripRootPath(module.exports.rootPath, req.path);
+  const strippedPath = stripRootPath(module.exports.rootPath, req.path);
   const filePath = path.join(module.exports.apiDataPath, strippedPath + params + '.' + req.method + '.json');
   log.info(`Loading data from ${filePath}`);
   fs.readFile(filePath, function(err, data) {
@@ -219,7 +229,6 @@ function main() {
 
   if (version < 6) {
     message = 'Your Node.js version is not supported. You must install Node.js >= 6.0';
-    console.log(message);
     log.info(message);
     return;
   }
@@ -236,7 +245,6 @@ function main() {
     } else {
       message += '\npreferring stub over API endpoint';
     }
-    console.log(message);
     log.info(message);
   });
 }
