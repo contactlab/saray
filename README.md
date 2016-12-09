@@ -49,13 +49,33 @@ Saray can operate as a proxy between the client and your api endpoint. So, if yo
 an endpoint, saray can redirect your calls without stubbed data directly to your real APIs.
 Using the parameter '--prefer-api', you can tell Saray to prefer real APis instead of stubbed data.
 
-## How to run
+## Installation & run
+
+You can install Saray with npm locally to you project, but the preferred way is the global installation
+
 ```bash
 $ npm install -g saray
+```
+
+Then you can start Saray
+
+```bash
 $ saray --port 8081 --path /path/to/data --endpoint 'https://myapis.com' --prefer-api
 ```
 
-Port is by default 8081, path is `path.join(__dirname, 'data')`, endpoint is null and prefer-api is false.
+## Clone
+
+Alternatively you can clone this repo, then from the command line run
+
+```
+$ npm install
+```
+
+to install all required dependencies, then you can run
+
+```
+$ node index.js --port 8081 --path /path/to/data --endpoint 'https://myapis.com' --prefer-api
+```
 
 ## Help
 ```bash
@@ -75,8 +95,16 @@ $ saray --help
     --pfer-api, --prefer-api  Prefer API enpoint to stubbed data (default: false)
 ```
 
-## Tests
+## Available commands
 
 ```
 $ npm test
 ```
+
+Run unit tests and integration tests for Saray.
+
+```
+$ npm start
+```
+
+Start Saray from command line directly from cloned repository
