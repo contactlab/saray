@@ -173,31 +173,43 @@ sarayRouter.all('/*', function(req, res) {
 
 app.use(module.exports.rootPath, sarayRouter);
 
-function main() {
+function checkVersion() {
   const version = parseFloat(process.version.replace('v', ''));
 
-  let message = '';
-
   if (version < 6) {
-    message = 'Your Node.js version is not supported. You must install Node.js >= 6.0';
-    log.info(message);
+    log.info('Your Node.js version is not supported. You must install Node.js >= 6.0');
+    return false;
+  }
+
+  return true;
+}
+
+function startExpressServer() {
+  app.listen(port, function() {
+    log.info(
+      'ContactLab API stubber listening on port ' + port +
+      ' reading from path ' + module.exports.apiDataPath +
+      ' using base path ' + module.exports.rootPath
+    );
+
+    if (program.endpoint) {
+      log.info('using endpoint ' + program.endpoint);
+    }
+
+    if (program.preferApi) {
+      log.info('preferring API endpoint over stub');
+    } else {
+      log.info('preferring stub over API endpoint');
+    }
+  });
+}
+
+function main() {
+  if (!checkVersion) {
     return;
   }
 
-  app.listen(port, function() {
-    message = 'ContactLab API stubber listening on port ' + port +
-    '\nreading from path ' + module.exports.apiDataPath +
-    '\nusing base path ' + module.exports.rootPath;
-    if (program.endpoint) {
-      message += '\nusing endpoint ' + program.endpoint;
-    }
-    if (program.preferApi) {
-      message += '\npreferring API endpoint over stub';
-    } else {
-      message += '\npreferring stub over API endpoint';
-    }
-    log.info(message);
-  });
+  startExpressServer();
 }
 
 main();
