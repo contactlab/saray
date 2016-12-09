@@ -3,14 +3,13 @@
 const bodyParser = require('body-parser');
 const bunyan = require('bunyan');
 const express = require('express');
-const fetch = require('node-fetch');
 const fs = require('fs');
 const path = require('path');
 const process = require('process');
 const program = require('commander');
 
 const utils = require('./utils');
-const middlewares = require('./middlewares');
+const corsMiddleware = require('./middlewares/cors');
 
 const app = express();
 
@@ -48,61 +47,10 @@ app.use(bodyParser.urlencoded({
   extended: true
 }));
 
-app.use(middlewares.cors);
+app.use(corsMiddleware);
 
-app.use(function(req, res, next) {
-  const endpoint = program.endpoint;
-
-  if (endpoint !== null) {
-    const params = utils.getQueryString(req);
-    const allowedMethods = utils.reallyAllowedMethods(
-      req,
-      params,
-      module.exports.apiDataPath,
-      module.exports.rootPath
-    );
-    if (allowedMethods.length && !program.preferApi) {
-      res.set('Saray-Stubbed', true);
-      log.info(`Stubbing API call ${req.method} ${req.path} ${params}`);
-      next();
-    } else {
-      res.set('Saray-Stubbed', false);
-      log.info(`Not stubbing API call ${req.method} ${req.path} ${params}`);
-
-      const headers = Object.assign({}, req.headers);
-      delete headers.host;
-      const opts = {
-        method: req.method,
-        headers: headers
-      };
-
-      if (req.method === 'POST' || req.method === 'PATCH') {
-        opts.body = JSON.stringify(req.body);
-      }
-
-      const strippedPath = utils.stripRootPath(module.exports.rootPath, req.path);
-      log.info(`Fetching API call ${req.method} ${strippedPath} from ${endpoint}`);
-      fetch(endpoint + strippedPath, opts).then(function(response) {
-        const contentType = response.headers.get('content-type');
-        if (contentType) {
-          res.set('Content-type', response.headers.get('content-type'));
-        }
-        log.info(`Fetched API call ${req.method} ${strippedPath} from ${endpoint} with status ${response.status}`);
-        res.status(response.status);
-        return response.text();
-      }).then(function(text) {
-        res.send(text);
-      }).catch(function() {
-        log.info(`Error with API call ${req.method} ${req.path} from ${endpoint}`);
-        res.sendStatus(404);
-      });
-    }
-  } else {
-    res.set('Saray-Stubbed', true);
-    log.info(`Stubbing API call ${req.method} ${req.path} with no endpoint specified`);
-    next();
-  }
-});
+const endpointMiddleware = require('./middlewares/endpoint')(log, program.endpoint, program.preferApi);
+app.use(endpointMiddleware);
 
 const port = program.port;
 module.exports.port = port;

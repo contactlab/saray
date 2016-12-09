@@ -1,4 +1,4 @@
-const utils = require('./utils');
+const utils = require('../utils');
 
 function cors(req, res, next) {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -11,6 +11,4 @@ function cors(req, res, next) {
   next();
 }
 
-module.exports = {
-  cors: cors
-};
+module.exports = cors;
