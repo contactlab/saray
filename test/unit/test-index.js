@@ -1,4 +1,5 @@
 const assert = require('assert');
+const utils = require('../../utils');
 const app = require('../../index');
 
 describe('Unit tests', function() {
@@ -7,14 +8,14 @@ describe('Unit tests', function() {
       param1: 'value1',
       param2: 'value2'
     };
-    const paramsString = app.getParamsString(rawParams);
+    const paramsString = utils.getParamsString(rawParams);
 
     assert.equal(paramsString, 'param1=value1&param2=value2');
   });
 
   it('Should parse correctly empty URL parameters', function() {
     const rawParams = {};
-    const paramsString = app.getParamsString(rawParams);
+    const paramsString = utils.getParamsString(rawParams);
 
     assert.strictEqual(paramsString, '');
     assert.notStrictEqual(paramsString, false);
@@ -28,7 +29,7 @@ describe('Unit tests', function() {
         param2: 'value2'
       }
     };
-    const queryString = app.getQueryString(req);
+    const queryString = utils.getQueryString(req);
 
     assert.equal(queryString, '?param1=value1&param2=value2');
   });
@@ -38,7 +39,7 @@ describe('Unit tests', function() {
       method: 'GET',
       query: {}
     };
-    const queryString = app.getQueryString(req);
+    const queryString = utils.getQueryString(req);
 
     assert.equal(queryString, '');
   });
@@ -51,7 +52,7 @@ describe('Unit tests', function() {
         param2: 'value2'
       }
     };
-    const queryString = app.getQueryString(req);
+    const queryString = utils.getQueryString(req);
 
     assert.equal(queryString, '?param1=value1&param2=value2');
   });
@@ -61,15 +62,15 @@ describe('Unit tests', function() {
       method: 'POST',
       body: {}
     };
-    const queryString = app.getQueryString(req);
+    const queryString = utils.getQueryString(req);
 
     assert.equal(queryString, '');
   });
 
   it('Should strip correctly root path from filesystem path', function() {
-    const path1 = app.stripRootPath('/paolo', '/paolo/v1/me');
-    const path2 = app.stripRootPath('/paolo', '/v1/me/paolo');
-    const path3 = app.stripRootPath('/paolo', '/v1/paolo/me');
+    const path1 = utils.stripRootPath('/paolo', '/paolo/v1/me');
+    const path2 = utils.stripRootPath('/paolo', '/v1/me/paolo');
+    const path3 = utils.stripRootPath('/paolo', '/v1/paolo/me');
     assert.equal(path1, '/v1/me');
     assert.equal(path2, '/v1/me/paolo');
     assert.equal(path3, '/v1/paolo/me');
