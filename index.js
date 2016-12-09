@@ -10,6 +10,7 @@ const process = require('process');
 const program = require('commander');
 
 const utils = require('./utils');
+const middlewares = require('./middlewares');
 
 const app = express();
 
@@ -47,16 +48,7 @@ app.use(bodyParser.urlencoded({
   extended: true
 }));
 
-app.use(function(req, res, next) {
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', utils.allowedMethods.join(', '));
-  res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
-  // Set to true if you need the website to include cookies in the requests sent
-  // to the API (e.g. in case you use sessions)
-  res.setHeader('Access-Control-Allow-Credentials', true);
-
-  next();
-});
+app.use(middlewares.cors);
 
 app.use(function(req, res, next) {
   const endpoint = program.endpoint;
