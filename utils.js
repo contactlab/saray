@@ -46,7 +46,9 @@ const reallyAllowedMethods = function(req, params, apiDataPath, rootPath) {
     // Here we need to consider paths that have both parameters and not
     const filePaths = [
       path.join(apiDataPath, strippedPath + params + '.' + method + '.json'),
-      path.join(apiDataPath, strippedPath + '.' + method + '.json')
+      path.join(apiDataPath, strippedPath + '.' + method + '.json'),
+      path.join(apiDataPath, strippedPath + params + '.' + method + '.js'),
+      path.join(apiDataPath, strippedPath + '.' + method + '.js')
     ];
 
     return filePaths.reduce(function(acc, cur) {
