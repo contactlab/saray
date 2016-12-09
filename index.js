@@ -42,6 +42,12 @@ module.exports.rootPath = rootPath;
 const sarayRouter = express.Router();
 module.exports.sarayRouter = sarayRouter;
 
+const port = program.port;
+module.exports.port = port;
+
+const apiDataPath = path.resolve(program.path);
+module.exports.apiDataPath = apiDataPath;
+
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({
   extended: true
@@ -51,12 +57,6 @@ app.use(corsMiddleware);
 
 const endpointMiddleware = require('./middlewares/endpoint')(log, program.endpoint, program.preferApi);
 app.use(endpointMiddleware);
-
-const port = program.port;
-module.exports.port = port;
-
-const apiDataPath = path.resolve(program.path);
-module.exports.apiDataPath = apiDataPath;
 
 sarayRouter.all('/*', function(req, res) {
   const params = utils.getQueryString(req);
@@ -68,6 +68,7 @@ sarayRouter.all('/*', function(req, res) {
       module.exports.apiDataPath,
       module.exports.rootPath
     );
+
     if(methods.length) {
       res.setHeader('Access-Control-Allow-Methods', methods.join(', '));
       res.send(methods);
