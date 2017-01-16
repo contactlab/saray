@@ -10,7 +10,7 @@ This is a simple API stubber for testing purposes.
 
 ## How to use
 
-The stubber responses are based on a filesystem hierarchy of JSON files, so to
+The stubber responses are based on a filesystem hierarchy of JS and JSON files, so to
 simulate the behaviour of your API you need to reproduce the HTTP URI using path
 on your filesystem. The final part of your URL and the HTTP method define the
 name of the JSON/JS file that the simple stubber will read to respond to your test
@@ -62,7 +62,7 @@ module.exports = function(req, res, log, next) {
 };
 ```
 
-## Enpoint integration
+## Endpoint integration
 
 Saray can operate as a proxy between the client and your api endpoint. So, if you define
 an endpoint, saray can redirect your calls without stubbed data directly to your real APIs.
