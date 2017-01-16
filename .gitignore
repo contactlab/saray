@@ -1,4 +1,7 @@
 /node_modules
 /data
+*.log
 
 npm-debug.log
+saray.sublime-project
+saray.sublime-workspace

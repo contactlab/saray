@@ -3,26 +3,30 @@
 const bodyParser = require('body-parser');
 const bunyan = require('bunyan');
 const express = require('express');
-const fetch = require('node-fetch');
 const fs = require('fs');
 const path = require('path');
+const process = require('process');
 const program = require('commander');
+
+const utils = require('./utils');
+const corsMiddleware = require('./middlewares/cors').cors;
 
 const app = express();
 
-const allowedMethods = ['GET', 'POST', 'OPTIONS', 'PUT', 'PATCH', 'DELETE'];
 const DEFAULT_PORT = 8081;
-const DEFAULT_PATH = path.join(__dirname, 'data');
+const DEFAULT_PATH = path.join(process.cwd(), 'data');
 const DEFAULT_LOG_PATH = path.join(__dirname, 'saray.log');
+const DEFAULT_ROOT_PATH = '';
 
 program
-  .version('1.4.0')
+  .version('1.5.0-beta')
   .description("'Yet Another Rest API Stubber'.split(' ').reverse().map(item => item[0].toLowerCase()).join('')")
   .option('--port <port>', 'The port to listen to (default: 8081)', DEFAULT_PORT)
   .option('--path <password>', 'The path for stubbed data (default ./data)', DEFAULT_PATH)
   .option('--endpoint <endpoint>', 'The endpoint (default null)', null)
   .option('--pfer-api, --prefer-api', 'Prefer API enpoint to stubbed data (default: false)', false)
   .option('--log <log_path>', 'Log file path', DEFAULT_LOG_PATH)
+  .option('--root <root_path>', 'The base root path (default: empty)', DEFAULT_ROOT_PATH)
   .parse(process.argv);
 
 const log = bunyan.createLogger({
@@ -32,138 +36,39 @@ const log = bunyan.createLogger({
   }]
 });
 
+const rootPath = program.root;
+module.exports.rootPath = rootPath;
+
+const sarayRouter = express.Router();
+module.exports.sarayRouter = sarayRouter;
+
+const port = program.port;
+module.exports.port = port;
+
+const apiDataPath = path.resolve(program.path);
+module.exports.apiDataPath = apiDataPath;
+
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({
   extended: true
 }));
 
-app.use(function(req, res, next) {
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', allowedMethods.join(', '));
-  res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
-  // Set to true if you need the website to include cookies in the requests sent
-  // to the API (e.g. in case you use sessions)
-  res.setHeader('Access-Control-Allow-Credentials', true);
+app.use(corsMiddleware);
 
-  next();
-});
+const endpointMiddleware = require('./middlewares/endpoint')(log, program.endpoint, program.preferApi);
+app.use(endpointMiddleware);
 
-/**
- * Parse an HTTP parameters object and convert it into a query string
- *
- * @param  {Object} rawParams HTTP parameters object
- * @return {string}           the query string
- */
-const getParamsString = function(rawParams) {
-  return Object.keys(rawParams)
-    .reduce((acc, cur) => {
-      acc.push(cur + '=' + rawParams[cur]);
-      return acc;
-    }, [])
-    .join('&');
-};
-module.exports.getParamsString = getParamsString;
-
-function getQueryString(req) {
-  let rawParams = {};
-
-  // GET and POST parameters object are the same, but they are in different
-  // request properties
-  if (req.method === 'GET') {
-    rawParams = req.query
-  } else if (req.method === 'POST') {
-    rawParams = req.body;
-  }
-
-  const paramString = getParamsString(rawParams);
-  const params = paramString !== '' ? '?' + paramString : '';
-  return params;
+function loadJSFile(filePath, req, res, log, next) {
+  log.info(`Loading data from ${filePath}`);
+  const jsParsed = require(filePath);
+  jsParsed(req, res, log, next);
 }
-module.exports.getQueryString = getQueryString;
 
-function reallyAllowedMethods(req, params) {
-  return allowedMethods.filter(function(method) {
-    const filePath = path.join(module.exports.apiDataPath, req.path + params + '.' + method + '.json');
-    if(fs.existsSync(filePath)) {
-      return method;
-    }
-  });
-}
-module.exports.reallyAllowedMethods = reallyAllowedMethods;
-
-app.use(function(req, res, next) {
-  const endpoint = program.endpoint;
-
-  if (endpoint !== null) {
-    const params = getQueryString(req);
-    const allowedMethods = reallyAllowedMethods(req, params);
-    if (allowedMethods.length && !program.preferApi) {
-      res.set('Saray-Stubbed', true);
-      log.info(`Stubbing API call ${req.method} ${req.path} ${params}`);
-      next();
-    } else {
-      res.set('Saray-Stubbed', false);
-      log.info(`Not stubbing API call ${req.method} ${req.path} ${params}`);
-
-      const headers = Object.assign({}, req.headers);
-      delete headers.host;
-      const opts = {
-        method: req.method,
-        headers: headers
-      };
-
-      if (req.method === 'POST' || req.method === 'PATCH') {
-        opts.body = JSON.stringify(req.body);
-      }
-
-      log.info(`Fetching API call ${req.method} ${req.path} from ${endpoint}`);
-      fetch(endpoint + req.path, opts).then(function(response) {
-        const contentType = response.headers.get('content-type');
-        if (contentType) {
-          res.set('Content-type', response.headers.get('content-type'));
-        }
-        log.info(`Fetched API call ${req.method} ${req.path} from ${endpoint} with status ${response.status}`);
-        return response.text();
-      }).then(function(text) {
-        res.send(text);
-      }).catch(function(response) {
-        log.info(`Error with API call ${req.method} ${req.path} from ${endpoint}`);
-        res.sendStatus(404);
-      });
-    }
-  } else {
-    res.set('Saray-Stubbed', true);
-    log.info(`Stubbing API call ${req.method} ${req.path} with no endpoint specified`);
-    next();
-  }
-});
-
-const port = program.port;
-module.exports.port = port;
-
-const apiDataPath = program.path;
-module.exports.apiDataPath = apiDataPath;
-
-app.all('/*', function(req, res) {
-  const params = getQueryString(req);
-
-  if (req.method === 'OPTIONS') {
-    const methods = reallyAllowedMethods(req, params);
-    if(methods.length) {
-      res.setHeader('Access-Control-Allow-Methods', methods.join(', '));
-      res.send(methods);
-    } else {
-      res.setHeader('Access-Control-Allow-Methods', '');
-      res.status(404).send();
-    }
-    return;
-  }
-
-  const filePath = path.join(module.exports.apiDataPath, req.path + params + '.' + req.method + '.json');
+function loadJSONFile(filePath, req, res, log) {
   log.info(`Loading data from ${filePath}`);
   fs.readFile(filePath, function(err, data) {
     if (err) {
-      log.error(`${filePath} doen not exist`);
+      log.error(`${filePath} does not exist`);
       log.error(err);
       res.status(404).json({
         error: 'Probably this is not the API response you are looking for, missing JSON file for ' + req.path
@@ -189,20 +94,87 @@ app.all('/*', function(req, res) {
 
     res.json(obj);
   });
+}
+
+sarayRouter.all('/*', function(req, res, next) {
+  const params = utils.getQueryString(req);
+
+  if (req.method === 'OPTIONS') {
+    const methods = utils.reallyAllowedMethods(
+      req,
+      params,
+      module.exports.apiDataPath,
+      module.exports.rootPath
+    );
+
+    if (methods.length) {
+      res.setHeader('Access-Control-Allow-Methods', methods.join(', '));
+      res.send(methods);
+    } else {
+      res.setHeader('Access-Control-Allow-Methods', '');
+      res.status(404).send();
+    }
+    return;
+  }
+
+  const strippedPath = utils.stripRootPath(module.exports.rootPath, req.path);
+  const jsonFilePath = path.join(module.exports.apiDataPath, strippedPath + params + '.' + req.method + '.json');
+  const jsFilePath = path.join(module.exports.apiDataPath, strippedPath + params + '.' + req.method + '.js');
+
+  if (fs.existsSync(jsonFilePath)) {
+    loadJSONFile(jsonFilePath, req, res, log);
+  } else if (fs.existsSync(jsFilePath)) {
+    loadJSFile(jsFilePath, req, res, log, next);
+  } else {
+    log.error('Probably this is not the API response you are looking for, missing JSON file for ' + req.path);
+    res.status(404).json({
+      error: 'Probably this is not the API response you are looking for, missing JSON file for ' + req.path
+    });
+    return;
+  }
 });
 
-app.listen(port, function() {
-  let message = 'ContactLab API stubber listening on port ' + port + '\nreading from path ' + module.exports.apiDataPath;
-  if (program.endpoint) {
-    message += '\nusing endpoint ' + program.endpoint;
+app.use(module.exports.rootPath, sarayRouter);
+
+function checkVersion() {
+  const version = parseFloat(process.version.replace('v', ''));
+
+  if (version < 6) {
+    log.info('Your Node.js version is not supported. You must install Node.js >= 6.0');
+    return false;
   }
-  if (program.preferApi) {
-    message += '\npreferring API endpoint over stub';
-  } else {
-    message += '\npreferring stub over API endpoint';
+
+  return true;
+}
+
+function startExpressServer() {
+  app.listen(port, function() {
+    log.info(
+      'ContactLab API stubber listening on port ' + port +
+      ' reading from path ' + module.exports.apiDataPath +
+      ' using base path ' + module.exports.rootPath
+    );
+
+    if (program.endpoint) {
+      log.info('using endpoint ' + program.endpoint);
+    }
+
+    if (program.preferApi) {
+      log.info('preferring API endpoint over stub');
+    } else {
+      log.info('preferring stub over API endpoint');
+    }
+  });
+}
+
+function main() {
+  if (!checkVersion) {
+    return;
   }
-  console.log(message);
-  log.info(message);
-});
+
+  startExpressServer();
+}
+
+main();
 
 module.exports.app = app;
