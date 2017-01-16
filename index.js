@@ -58,33 +58,17 @@ app.use(corsMiddleware);
 const endpointMiddleware = require('./middlewares/endpoint')(log, program.endpoint, program.preferApi);
 app.use(endpointMiddleware);
 
-sarayRouter.all('/*', function(req, res) {
-  const params = utils.getQueryString(req);
+function loadJSFile(filePath, req, res, log, next) {
+  log.info(`Loading data from ${filePath}`);
+  const jsParsed = require(filePath);
+  jsParsed(req, res, log, next);
+}
 
-  if (req.method === 'OPTIONS') {
-    const methods = utils.reallyAllowedMethods(
-      req,
-      params,
-      module.exports.apiDataPath,
-      module.exports.rootPath
-    );
-
-    if(methods.length) {
-      res.setHeader('Access-Control-Allow-Methods', methods.join(', '));
-      res.send(methods);
-    } else {
-      res.setHeader('Access-Control-Allow-Methods', '');
-      res.status(404).send();
-    }
-    return;
-  }
-
-  const strippedPath = utils.stripRootPath(module.exports.rootPath, req.path);
-  const filePath = path.join(module.exports.apiDataPath, strippedPath + params + '.' + req.method + '.json');
+function loadJSONFile(filePath, req, res, log) {
   log.info(`Loading data from ${filePath}`);
   fs.readFile(filePath, function(err, data) {
     if (err) {
-      log.error(`${filePath} doen not exist`);
+      log.error(`${filePath} does not exist`);
       log.error(err);
       res.status(404).json({
         error: 'Probably this is not the API response you are looking for, missing JSON file for ' + req.path
@@ -110,6 +94,44 @@ sarayRouter.all('/*', function(req, res) {
 
     res.json(obj);
   });
+}
+
+sarayRouter.all('/*', function(req, res, next) {
+  const params = utils.getQueryString(req);
+
+  if (req.method === 'OPTIONS') {
+    const methods = utils.reallyAllowedMethods(
+      req,
+      params,
+      module.exports.apiDataPath,
+      module.exports.rootPath
+    );
+
+    if (methods.length) {
+      res.setHeader('Access-Control-Allow-Methods', methods.join(', '));
+      res.send(methods);
+    } else {
+      res.setHeader('Access-Control-Allow-Methods', '');
+      res.status(404).send();
+    }
+    return;
+  }
+
+  const strippedPath = utils.stripRootPath(module.exports.rootPath, req.path);
+  const jsonFilePath = path.join(module.exports.apiDataPath, strippedPath + params + '.' + req.method + '.json');
+  const jsFilePath = path.join(module.exports.apiDataPath, strippedPath + params + '.' + req.method + '.js');
+
+  if (fs.existsSync(jsonFilePath)) {
+    loadJSONFile(jsonFilePath, req, res, log);
+  } else if (fs.existsSync(jsFilePath)) {
+    loadJSFile(jsFilePath, req, res, log, next);
+  } else {
+    log.error('Probably this is not the API response you are looking for, missing JSON file for ' + req.path);
+    res.status(404).json({
+      error: 'Probably this is not the API response you are looking for, missing JSON file for ' + req.path
+    });
+    return;
+  }
 });
 
 app.use(module.exports.rootPath, sarayRouter);

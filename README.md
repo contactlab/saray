@@ -13,7 +13,7 @@ This is a simple API stubber for testing purposes.
 The stubber responses are based on a filesystem hierarchy of JSON files, so to
 simulate the behaviour of your API you need to reproduce the HTTP URI using path
 on your filesystem. The final part of your URL and the HTTP method define the
-name of the JSON file that the simple stubber will read to respond to your test
+name of the JSON/JS file that the simple stubber will read to respond to your test
 requests.
 Probably it's better explained with an example.
 
@@ -42,6 +42,25 @@ The same applies for the others `HTTP` methods.
 
 This stubber has a basic support for POST requests, so the parameters should be
 very simple, similar to a GET request.
+
+## Data stubbed in JS format
+
+From version 1.5.0 Saray has the built-in support for data stubbed in JS format. With this new format, you can prepare scriptable stubbed data interpeted directly by Node.js.
+
+Every JS-stubbed file must be a Node.js module exporting a single function. This function can take four parameters:
+
+- *req*: [Express Request object](http://expressjs.com/en/4x/api.html#req)
+- *res*: [Express Response object](http://expressjs.com/en/4x/api.html#res)
+- *log*: [Bunyan Log object](https://github.com/trentm/node-bunyan)
+- *next*: next middleware function
+
+For example:
+
+```javascript
+module.exports = function(req, res, log, next) {
+  res.json({key: 'value'});
+};
+```
 
 ## Enpoint integration
 

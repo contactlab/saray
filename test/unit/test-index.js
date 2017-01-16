@@ -1,6 +1,5 @@
 const assert = require('assert');
 const utils = require('../../utils');
-const app = require('../../index');
 
 describe('Unit tests', function() {
   it('Should parse correctly URL parameters', function() {
