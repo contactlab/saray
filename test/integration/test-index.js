@@ -15,6 +15,24 @@ describe('Integration', function() {
       .end(done);
   });
 
+  it('HTTP GET CORS call to a right address with JSON stubbed data', function(done) {
+    supertest(app.app)
+      .options('/call')
+      .set('Origin', 'http://saray.example.com')
+      .set('custom-header1', 'custom-value1')
+      .set('custom-header2', 'custom-value2')
+      .set('Access-Control-Request-Headers', 'custom-header1, custom-header2')
+      .set('Access-Control-Request-Method', 'GET')
+      .expect(200)
+      .end(function(err, response) {
+        assert.ok(!err);
+        assert.ok(
+          response.headers['access-control-allow-headers'] === 'Origin, X-Requested-With, Content-Type, Accept, Authorization, custom-header1, custom-header2'
+        );
+        return done();
+      });
+  });
+
   it('HTTP GET call to a right address with JSON stubbed data', function(done) {
     supertest(app.app)
       .get('/call')
@@ -206,6 +224,24 @@ describe('Integration with rootPath', function() {
       .get('/saray/abc/wrong')
       .expect(404)
       .end(done);
+  });
+
+  it('HTTP GET CORS call to a right address with JSON stubbed data', function(done) {
+    supertest(app.app)
+      .options('/call')
+      .set('Origin', 'http://saray.example.com')
+      .set('custom-header1', 'custom-value1')
+      .set('custom-header2', 'custom-value2')
+      .set('Access-Control-Request-Headers', 'custom-header1, custom-header2')
+      .set('Access-Control-Request-Method', 'GET')
+      .expect(200)
+      .end(function(err, response) {
+        assert.ok(!err);
+        assert.ok(
+          response.headers['access-control-allow-headers'] === 'Origin, X-Requested-With, Content-Type, Accept, Authorization, custom-header1, custom-header2'
+        );
+        return done();
+      });
   });
 
   it('HTTP GET call to a right address with JSON stubbed data', function(done) {

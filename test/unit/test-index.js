@@ -1,5 +1,6 @@
 const assert = require('assert');
 const utils = require('../../utils');
+const corsMiddleware = require('../../middlewares/cors');
 
 describe('Unit tests', function() {
   it('Should parse correctly URL parameters', function() {
@@ -73,5 +74,13 @@ describe('Unit tests', function() {
     assert.equal(path1, '/v1/me');
     assert.equal(path2, '/v1/me/paolo');
     assert.equal(path3, '/v1/paolo/me');
+  });
+
+  it('Should add correctly CORS custom headers to accepted headers', function() {
+    const requestHeaders = 'custom-header1, custom-header2';
+    const allowedHeaders = 'Origin, X-Requested-With, Content-Type, Accept, Authorization';
+    const finalExpectedHeaders = allowedHeaders + ', ' + requestHeaders;
+    const finalComputedHeaders = corsMiddleware.updateCORSAllowedHeaders(requestHeaders, allowedHeaders);
+    assert.equal(finalExpectedHeaders, finalComputedHeaders);
   });
 });

@@ -9,7 +9,7 @@ const process = require('process');
 const program = require('commander');
 
 const utils = require('./utils');
-const corsMiddleware = require('./middlewares/cors');
+const corsMiddleware = require('./middlewares/cors').cors;
 
 const app = express();
 
