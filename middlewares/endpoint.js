@@ -1,4 +1,5 @@
 const utils = require('../utils');
+const fetch = require('node-fetch');
 
 function middleware(log, endpoint, preferApi, apiDataPath, rootPath) {
   return function endpointMiddleware(req, res, next) {
