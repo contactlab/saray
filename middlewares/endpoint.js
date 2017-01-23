@@ -1,4 +1,5 @@
 const utils = require('../utils');
+const fetch = require('node-fetch');
 
 function middleware(log, endpoint, preferApi, apiDataPath, rootPath) {
   return function endpointMiddleware(req, res, next) {
@@ -29,7 +30,7 @@ function middleware(log, endpoint, preferApi, apiDataPath, rootPath) {
           opts.body = JSON.stringify(req.body);
         }
 
-        const strippedPath = utils.stripRootPath(module.exports.rootPath, req.path);
+        const strippedPath = utils.stripRootPath(rootPath, req.path);
         log.info(`Fetching API call ${req.method} ${strippedPath} from ${endpoint}`);
         fetch(endpoint + strippedPath, opts).then(function(response) {
           const contentType = response.headers.get('content-type');
