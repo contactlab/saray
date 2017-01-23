@@ -1,14 +1,14 @@
 const utils = require('../utils');
 
-function middleware(log, endpoint, preferApi) {
+function middleware(log, endpoint, preferApi, apiDataPath, rootPath) {
   return function endpointMiddleware(req, res, next) {
     if (endpoint !== null) {
       const params = utils.getQueryString(req);
       const allowedMethods = utils.reallyAllowedMethods(
         req,
         params,
-        module.exports.apiDataPath,
-        module.exports.rootPath
+        apiDataPath,
+        rootPath
       );
       if (allowedMethods.length && !preferApi) {
         res.set('Saray-Stubbed', true);
