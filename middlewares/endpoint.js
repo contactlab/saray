@@ -32,7 +32,7 @@ function middleware(log, endpoint, preferApi, apiDataPath, rootPath) {
 
         const strippedPath = utils.stripRootPath(rootPath, req.path);
         log.info(`Fetching API call ${req.method} ${strippedPath} from ${endpoint}`);
-        fetch(endpoint + strippedPath, opts).then(function(response) {
+        fetch(endpoint + strippedPath + params, opts).then(function(response) {
           const contentType = response.headers.get('content-type');
           if (contentType) {
             res.set('Content-type', response.headers.get('content-type'));
