@@ -19,8 +19,8 @@ const DEFAULT_LOG_PATH = path.join(__dirname, 'saray.log');
 const DEFAULT_ROOT_PATH = '';
 
 program
-  .version('1.5.3')
-  .description("'Yet Another Rest API Stubber'.split(' ').reverse().map(item => item[0].toLowerCase()).join('')")
+  .version('1.6.0')
+  .description('\'Yet Another Rest API Stubber\'.split(\' \').reverse().map(item => item[0].toLowerCase()).join(\'\')')
   .option('--port <port>', 'The port to listen to (default: 8081)', DEFAULT_PORT)
   .option('--path <password>', 'The path for stubbed data (default ./data)', DEFAULT_PATH)
   .option('--endpoint <endpoint>', 'The endpoint (default null)', null)
@@ -125,12 +125,15 @@ sarayRouter.all('/*', function(req, res, next) {
 
   const strippedPath = utils.stripRootPath(module.exports.rootPath, req.path);
   const jsonFilePath = path.join(module.exports.apiDataPath, strippedPath + params + '.' + req.method + '.json');
-  const jsFilePath = path.join(module.exports.apiDataPath, strippedPath + params + '.' + req.method + '.js');
+  const jsFilePath = path.join(module.exports.apiDataPath, strippedPath + '.' + req.method + '.js');
+  const jsFilePathWithParams = path.join(module.exports.apiDataPath, strippedPath + params + '.' + req.method + '.js');
 
-  if (fs.existsSync(jsonFilePath)) {
-    loadJSONFile(jsonFilePath, req, res, log);
+  if (fs.existsSync(jsFilePathWithParams)) {
+    loadJSFile(jsFilePathWithParams, req, res, log, next);
   } else if (fs.existsSync(jsFilePath)) {
     loadJSFile(jsFilePath, req, res, log, next);
+  } else if (fs.existsSync(jsonFilePath)) {
+    loadJSONFile(jsonFilePath, req, res, log);
   } else {
     log.error('Probably this is not the API response you are looking for, missing JSON file for ' + req.path);
     res.status(404).json({
