@@ -213,6 +213,44 @@ describe('Integration', function() {
       });
   });
 
+  it('HTTP GET call to a right address with JS stubbed data to an updated file', function(done) {
+    supertest(app.app)
+      .get('/call6')
+      .expect(200)
+      .end(function(err, response) {
+        assert.ok(!err);
+        assert.ok(response.body.key, 'value');
+        // return done();
+      });
+    
+    const strippedPath = utils.stripRootPath(app.rootPath, '/call6');
+    const filePath = path.join(app.apiDataPath, strippedPath + '.GET.js');
+    const dataFile = fs.readFileSync(filePath);
+    const dataFileContent = dataFile.toString();
+    const dataFileContentReplaced = dataFileContent.replace('value', 'value2');
+    fs.writeFileSync(filePath, dataFileContentReplaced);
+    
+    supertest(app.app)
+      .get('/call6')
+      .expect(200)
+      .end(function(err, response) {
+        assert.ok(!err);
+        assert.equal(response.body.key, 'value2');
+
+        const dataFileContentReplaced2 = dataFileContent.replace('value2', 'value');
+        fs.writeFileSync(filePath, dataFileContentReplaced2);
+
+        supertest(app.app)
+          .get('/call6')
+          .expect(200)
+          .end(function(err, response) {
+            assert.ok(!err);
+            assert.equal(response.body.key, 'value');
+            return done();
+          });
+      });
+  });
+
   it('HTTP GET call to a right address with JS stubbed data that must be served first', function(done) {
     supertest(app.app)
       .get('/jsFirst')
