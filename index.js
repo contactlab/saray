@@ -125,12 +125,15 @@ sarayRouter.all('/*', function(req, res, next) {
 
   const strippedPath = utils.stripRootPath(module.exports.rootPath, req.path);
   const jsonFilePath = path.join(module.exports.apiDataPath, strippedPath + params + '.' + req.method + '.json');
-  const jsFilePath = path.join(module.exports.apiDataPath, strippedPath + params + '.' + req.method + '.js');
+  const jsFilePath = path.join(module.exports.apiDataPath, strippedPath + '.' + req.method + '.js');
+  const jsFilePathWithParams = path.join(module.exports.apiDataPath, strippedPath + params + '.' + req.method + '.js');
 
-  if (fs.existsSync(jsonFilePath)) {
-    loadJSONFile(jsonFilePath, req, res, log);
+  if (fs.existsSync(jsFilePathWithParams)) {
+    loadJSFile(jsFilePathWithParams, req, res, log, next);
   } else if (fs.existsSync(jsFilePath)) {
     loadJSFile(jsFilePath, req, res, log, next);
+  } else if (fs.existsSync(jsonFilePath)) {
+    loadJSONFile(jsonFilePath, req, res, log);
   } else {
     log.error('Probably this is not the API response you are looking for, missing JSON file for ' + req.path);
     res.status(404).json({
