@@ -212,6 +212,28 @@ describe('Integration', function() {
         return done();
       });
   });
+
+  it('HTTP GET call to a right address with JS stubbed data that must be served first', function(done) {
+    supertest(app.app)
+      .get('/jsFirst')
+      .expect(200)
+      .end(function(err, response) {
+        assert.ok(!err);
+        assert.deepEqual(response.body.key, 'valueJS');
+        return done();
+      });
+  });
+
+  it('HTTP GET call to a right address with JS stubbed data that must be served first with parameters', function(done) {
+    supertest(app.app)
+      .get('/jsFirst?param1=valueParam')
+      .expect(200)
+      .end(function(err, response) {
+        assert.ok(!err);
+        assert.deepEqual(response.body.key, 'valueJSvalueParam');
+        return done();
+      });
+  });
 });
 
 describe('Integration with rootPath', function() {
@@ -459,6 +481,28 @@ describe('Integration with rootPath', function() {
             assert.equal(response.body.key, 'value');
             return done();
           });
+      });
+  });
+
+  it('HTTP GET call to a right address with JS stubbed data that must be served first', function(done) {
+    supertest(app.app)
+      .get('/saray/abc/jsFirst')
+      .expect(200)
+      .end(function(err, response) {
+        assert.ok(!err);
+        assert.deepEqual(response.body.key, 'valueJS');
+        return done();
+      });
+  });
+
+  it('HTTP GET call to a right address with JS stubbed data that must be served first with parameters', function(done) {
+    supertest(app.app)
+      .get('/saray/abc/jsFirst?param1=valueParam')
+      .expect(200)
+      .end(function(err, response) {
+        assert.ok(!err);
+        assert.deepEqual(response.body.key, 'valueJSvalueParam');
+        return done();
       });
   });
 });
