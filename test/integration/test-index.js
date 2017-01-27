@@ -272,6 +272,17 @@ describe('Integration', function() {
         return done();
       });
   });
+
+  it('HTTP GET call to a right address with JS stubbed data that must be served first with parameters 2', function(done) {
+    supertest(app.app)
+      .get('/jsFirst?param2=value2')
+      .expect(200)
+      .end(function(err, response) {
+        assert.ok(!err);
+        assert.deepEqual(response.body.key, 'valueJS with param 2');
+        return done();
+      });
+  });
 });
 
 describe('Integration with rootPath', function() {
@@ -540,6 +551,17 @@ describe('Integration with rootPath', function() {
       .end(function(err, response) {
         assert.ok(!err);
         assert.deepEqual(response.body.key, 'valueJSvalueParam');
+        return done();
+      });
+  });
+
+  it('HTTP GET call to a right address with JS stubbed data that must be served first with parameters 2', function(done) {
+    supertest(app.app)
+      .get('/saray/abc/jsFirst?param2=value2')
+      .expect(200)
+      .end(function(err, response) {
+        assert.ok(!err);
+        assert.deepEqual(response.body.key, 'valueJS with param 2');
         return done();
       });
   });
