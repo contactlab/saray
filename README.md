@@ -1,4 +1,6 @@
-# Saray
+<!-- # Saray -->
+
+![Saray](saray.png)
 
 [![Build Status](https://travis-ci.org/contactlab/saray.svg)](https://travis-ci.org/contactlab/saray)
 
