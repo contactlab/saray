@@ -63,6 +63,26 @@ const endpointMiddleware = require('./middlewares/endpoint')(
   module.exports.rootPath);
 app.use(endpointMiddleware);
 
+
+function seekFallbackFile(apiDataPath, reqPath, req, ext, params)
+{
+  let paths = reqPath.split('/');
+  let fbPath = [];
+  while (paths.length > 1) {
+    let p = paths.pop();
+    fbPath.unshift(p);
+    let seekfile = null;
+    for (let i = 0; i < fbPath.length; ++i) {
+      seekFile = path.join(apiDataPath, paths.join('/') + (paths.length>1?'/':'') + fbPath.slice().fill('_', 0, i+1).join('/') + params + '.' + req.method + '.' + ext);
+      if (fs.existsSync(seekFile)) {
+        req.params._fallback = fbPath;
+        return seekFile;
+      }
+    }
+  }
+  return false;
+}
+
 function loadJSFile(filePath, req, res, log, next) {
   log.info(`Loading data from ${filePath}`);
   delete require.cache[filePath];  // we neeed this to reload JS file after every edit
@@ -128,12 +148,20 @@ sarayRouter.all('/*', function(req, res, next) {
   const jsFilePath = path.join(module.exports.apiDataPath, strippedPath + '.' + req.method + '.js');
   const jsFilePathWithParams = path.join(module.exports.apiDataPath, strippedPath + params + '.' + req.method + '.js');
 
+  let fallbackFilePath = null;
+
   if (fs.existsSync(jsFilePathWithParams)) {
     loadJSFile(jsFilePathWithParams, req, res, log, next);
+  } else if (fallbackFilePath = seekFallbackFile(module.exports.apiDataPath, strippedPath, req, 'js', params)) {
+    loadJSFile(fallbackFilePath, req, res, log, next);
   } else if (fs.existsSync(jsFilePath)) {
     loadJSFile(jsFilePath, req, res, log, next);
+  } else if (fallbackFilePath = seekFallbackFile(module.exports.apiDataPath, strippedPath, req, 'js', '')) {
+    loadJSFile(fallbackFilePath, req, res, log, next);
   } else if (fs.existsSync(jsonFilePath)) {
     loadJSONFile(jsonFilePath, req, res, log);
+  } else if (fallbackFilePath = seekFallbackFile(module.exports.apiDataPath, strippedPath, req, 'json', params)) {
+    loadJSONFile(fallbackFilePath, req, res, log);
   } else {
     log.error('Probably this is not the API response you are looking for, missing JSON file for ' + req.path);
     res.status(404).json({
