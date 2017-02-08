@@ -3,12 +3,15 @@
 ![Saray](saray.png)
 
 [![Build Status](https://travis-ci.org/contactlab/saray.svg)](https://travis-ci.org/contactlab/saray)
+[![GitHub tag](https://img.shields.io/github/release/contactlab/saray.svg?style=flat-square)](https://github.com/contactlab/saray)
+[![npm](https://img.shields.io/npm/dt/saray.svg?style=flat-square)](https://github.com/contactlab/saray)
+[![Package Quality](http://npm.packagequality.com/shield/saray.png?style=flat-square)](http://packagequality.com/#?package=saray)
 
 ```javascript
 'Yet Another Rest API Stubber'.split(' ').reverse().map(item => item[0].toLowerCase()).join('')
 ```
 
-This is a simple API stubber for testing purposes.
+> This is a simple API stubber for testing purposes.
 
 ## How to use
 
