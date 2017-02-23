@@ -222,14 +222,14 @@ describe('Integration', function() {
         assert.ok(response.body.key, 'value');
         // return done();
       });
-    
+
     const strippedPath = utils.stripRootPath(app.rootPath, '/call6');
     const filePath = path.join(app.apiDataPath, strippedPath + '.GET.js');
     const dataFile = fs.readFileSync(filePath);
     const dataFileContent = dataFile.toString();
     const dataFileContentReplaced = dataFileContent.replace('value', 'value2');
     fs.writeFileSync(filePath, dataFileContentReplaced);
-    
+
     supertest(app.app)
       .get('/call6')
       .expect(200)
@@ -504,14 +504,14 @@ describe('Integration with rootPath', function() {
         assert.ok(response.body.key, 'value');
         // return done();
       });
-    
+
     const strippedPath = utils.stripRootPath(app.rootPath, '/saray/abc/call6');
     const filePath = path.join(app.apiDataPath, strippedPath + '.GET.js');
     const dataFile = fs.readFileSync(filePath);
     const dataFileContent = dataFile.toString();
     const dataFileContentReplaced = dataFileContent.replace('value', 'value2');
     fs.writeFileSync(filePath, dataFileContentReplaced);
-    
+
     supertest(app.app)
       .get('/saray/abc/call6')
       .expect(200)
@@ -562,6 +562,49 @@ describe('Integration with rootPath', function() {
       .end(function(err, response) {
         assert.ok(!err);
         assert.deepEqual(response.body.key, 'valueJS with param 2');
+        return done();
+      });
+  });
+});
+
+describe('Integration with dynamic path feature enabled', function() {
+  before(function() {
+    app.apiDataPath = path.join(__dirname, '..', 'data');
+    app.dynPath = '_';
+  });
+
+  it('HTTP GET call to a wrong address', function(done) {
+    supertest(app.app)
+      .get('/wrong')
+      .expect(404)
+      .end(done);
+  });
+
+  it('HTTP GET CORS call to a right address with JSON stubbed data', function(done) {
+    supertest(app.app)
+      .options('/call')
+      .set('Origin', 'http://saray.example.com')
+      .set('custom-header1', 'custom-value1')
+      .set('custom-header2', 'custom-value2')
+      .set('Access-Control-Request-Headers', 'custom-header1, custom-header2')
+      .set('Access-Control-Request-Method', 'GET')
+      .expect(200)
+      .end(function(err, response) {
+        assert.ok(!err);
+        assert.ok(
+          response.headers['access-control-allow-headers'] === 'Origin, X-Requested-With, Content-Type, Accept, Authorization, custom-header1, custom-header2'
+        );
+        return done();
+      });
+  });
+
+  it('HTTP GET call to a right address with JSON stubbed data', function(done) {
+    supertest(app.app)
+      .get('/somepath/call')
+      .expect(200)
+      .end(function(err, response) {
+        assert.ok(!err);
+        assert.ok(response.body.key === 'dynpath-value');
         return done();
       });
   });
