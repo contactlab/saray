@@ -22,7 +22,11 @@
   "homepage": "https://github.com/contactlab/saray#readme",
   "scripts": {
     "start": "saray",
-    "test": "concurrently 'node index.js --port 8082 --path ./test/data --log saray.log --endpoint http://localhost:8084' 'node index.js --port 8083 --path ./test/data --log saray.log --endpoint http://localhost:8084 --pfer-api' 'node index.js --port 8084 --path ./test/data-endpoint --log saray-endpoint.log' './node_modules/.bin/mocha -u exports test/**/*.js' --kill-others --success first"
+    "saray-with-endpoint": "node index.js --port 8082 --path ./test/data --log saray.log --endpoint http://localhost:8084",
+    "saray-with-prefer-api": "node index.js --port 8083 --path ./test/data --log saray.log --endpoint http://localhost:8084 --pfer-api",
+    "saray-endpoint-service": "node index.js --port 8084 --path ./test/data-endpoint --log saray-endpoint.log",
+    "test-mocha": "./node_modules/.bin/mocha -u exports test/**/*.js",
+    "test": "concurrently 'npm run saray-with-endpoint' 'npm run saray-with-prefer-api' 'npm run saray-endpoint-service' 'npm run test-mocha' --kill-others --success first"
   },
   "dependencies": {
     "body-parser": "^1.15.2",
