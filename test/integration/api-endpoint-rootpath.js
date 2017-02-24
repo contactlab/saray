@@ -48,6 +48,9 @@ describe('Integration with api endpoint with rootpath', function() {
         const j = JSON.parse(response);
         assert.deepEqual(j.key, 'value endpoint not stubbed by caller');
         return done();
+      }).catch(function() {
+        assert.ok(false);
+        return done();
       });
   });
 
@@ -128,5 +131,23 @@ describe('Integration with api endpoint with prefer api with rootpath', function
         assert.deepEqual(response.status, 404);
         return done();
       });
+  });
+
+  it('HTTP GET call to an address stubbed by the caller and with network problems', function(done) {
+    const opts = {
+      method: 'GET'
+    };
+
+    fetch('http://localhost:8090/saray/abc/call', opts)
+      .then(function(response) {
+        assert.deepEqual(response.headers.get('saray-stubbed'), 'true');
+        assert.deepEqual(response.status, 200);
+        return response.text();
+      })
+      .then(function(response) {
+        const j = JSON.parse(response);
+        assert.deepEqual(j.key, 'value');
+        return done();
+      }).catch(done);
   });
 });

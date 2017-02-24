@@ -31,7 +31,7 @@ function middleware(log, endpoint, preferApi, apiDataPath, rootPath) {
         const strippedPath = utils.stripRootPath(rootPath, req.path);
         log.info(`Fetching API call ${req.method} ${strippedPath} from ${endpoint}`);
         fetch(endpoint + strippedPath + params, opts).then(function(response) {
-          if (response.status === 404) {
+          if (response.status >= 400 && response.status < 500) {
             res.set('Saray-Stubbed', true);
             log.info(`The API returned an HTTP 404 - Stubbing API call ${req.method} ${req.path} ${params}`);
             next();
@@ -53,7 +53,10 @@ function middleware(log, endpoint, preferApi, apiDataPath, rootPath) {
           }
         }).catch(function() {
           log.info(`Error with API call ${req.method} ${req.path} from ${endpoint}`);
-          res.sendStatus(404);
+          res.set('Saray-Stubbed', true);
+          log.info(`There was a network error through the endpoint - Stubbing API call ${req.method} ${req.path} ${params}`);
+          next();
+          return null;
         });
       }
     } else {
