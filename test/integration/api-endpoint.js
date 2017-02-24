@@ -154,4 +154,21 @@ describe('Integration with api endpoint with prefer api', function() {
         return done();
       }).catch(done);
   });
+
+  it('HTTP GET call to a stubbed address by caller, with endpoint that returns a 401', function(done) {
+    const opts = {
+      method: 'GET'
+    };
+    fetch('http://localhost:8083/call401', opts)
+      .then(function(response) {
+        assert.deepEqual(response.headers.get('saray-stubbed'), 'true');
+        assert.deepEqual(response.status, 200);
+        return response.text();
+      })
+      .then(function(response) {
+        const j = JSON.parse(response);
+        assert.deepEqual(j.key, 'value 401 stubbed');
+        return done();
+      });
+  });
 });
