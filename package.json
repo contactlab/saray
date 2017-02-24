@@ -25,8 +25,11 @@
     "saray-with-endpoint": "node index.js --port 8082 --path ./test/data --log saray.log --endpoint http://localhost:8084",
     "saray-with-prefer-api": "node index.js --port 8083 --path ./test/data --log saray.log --endpoint http://localhost:8084 --pfer-api",
     "saray-endpoint-service": "node index.js --port 8084 --path ./test/data-endpoint --log saray-endpoint.log",
+    "saray-with-endpoint-rootpath": "node index.js --port 8085 --path ./test/data --log saray.log --endpoint http://localhost:8087 --root '/saray/abc'",
+    "saray-with-prefer-api-rootpath": "node index.js --port 8086 --path ./test/data --log saray.log --endpoint http://localhost:8087 --pfer-api --root '/saray/abc'",
+    "saray-endpoint-service-rootpath": "node index.js --port 8087 --path ./test/data-endpoint --log saray-endpoint.log",
     "test-mocha": "./node_modules/.bin/mocha -u exports test/**/*.js",
-    "test": "concurrently 'npm run saray-with-endpoint' 'npm run saray-with-prefer-api' 'npm run saray-endpoint-service' 'npm run test-mocha' --kill-others --success first"
+    "test": "concurrently 'npm run saray-with-endpoint' 'npm run saray-with-prefer-api' 'npm run saray-endpoint-service' 'npm run saray-with-endpoint-rootpath' 'npm run saray-with-prefer-api-rootpath' 'npm run saray-endpoint-service-rootpath' 'npm run test-mocha' --kill-others --success first"
   },
   "dependencies": {
     "body-parser": "^1.15.2",
