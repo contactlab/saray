@@ -1,10 +1,5 @@
-const supertest = require('supertest');
 const assert = require('assert');
-const path = require('path');
 const fetch = require('node-fetch');
-const fs = require('fs');
-const app = require('../../index');
-const utils = require('../../utils');
 
 describe('Integration with api endpoint with rootpath', function() {
   it('HTTP GET call to a stubbed address', function(done) {
