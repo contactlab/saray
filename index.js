@@ -19,7 +19,7 @@ const DEFAULT_LOG_PATH = path.join(__dirname, 'saray.log');
 const DEFAULT_ROOT_PATH = '';
 
 program
-  .version('1.6.0')
+  .version('1.6.0-pfer-api-fix')
   .description('\'Yet Another Rest API Stubber\'.split(\' \').reverse().map(item => item[0].toLowerCase()).join(\'\')')
   .option('--port <port>', 'The port to listen to (default: 8081)', DEFAULT_PORT)
   .option('--path <password>', 'The path for stubbed data (default ./data)', DEFAULT_PATH)
