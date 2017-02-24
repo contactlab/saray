@@ -48,7 +48,7 @@ function middleware(log, endpoint, preferApi, apiDataPath, rootPath) {
           res.status(response.status);
           return response.text();
         }).then(function(text) {
-          if (text) {
+          if (text !== null) {
             res.send(text);
           }
         }).catch(function() {
