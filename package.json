@@ -22,7 +22,7 @@
   "homepage": "https://github.com/contactlab/saray#readme",
   "scripts": {
     "start": "saray",
-    "test": "./node_modules/.bin/mocha -u exports test/**/*.js"
+    "test": "concurrently 'node index.js --port 8082 --path ./test/data --log saray.log --endpoint http://localhost:8084' 'node index.js --port 8083 --path ./test/data --log saray.log --endpoint http://localhost:8084 --pfer-api' 'node index.js --port 8084 --path ./test/data-endpoint --log saray-endpoint.log' './node_modules/.bin/mocha -u exports test/**/*.js' --kill-others --success first"
   },
   "dependencies": {
     "body-parser": "^1.15.2",
@@ -33,13 +33,14 @@
     "node-fetch": "^1.6.3"
   },
   "devDependencies": {
-    "eslint": "^3.10.2",
+    "concurrently": "^3.3.0",
+    "eslint": "^3.16.1",
     "eslint-config-standard": "^6.2.1",
-    "eslint-plugin-promise": "^3.4.0",
+    "eslint-plugin-promise": "^3.4.2",
     "eslint-plugin-standard": "^2.0.1",
     "express-test": "^0.1.2",
-    "mocha": "^3.0.2",
-    "should": "^11.1.0",
-    "supertest": "^2.0.0"
+    "mocha": "^3.2.0",
+    "should": "^11.2.0",
+    "supertest": "^3.0.0"
   }
 }
