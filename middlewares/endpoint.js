@@ -24,22 +24,22 @@ function middleware(log, endpoint, preferApi, apiDataPath, rootPath) {
           headers: headers
         };
 
-        if (req.method === 'POST' || req.method === 'PATCH') {
+        if (req.method === 'POST' || req.method === 'PATCH' || req.method === 'PUT') {
           opts.body = JSON.stringify(req.body);
         }
 
         const strippedPath = utils.stripRootPath(rootPath, req.path);
         log.info(`Fetching API call ${req.method} ${strippedPath} from ${endpoint}`);
         fetch(endpoint + strippedPath + params, opts).then(function(response) {
-          if (response.status >= 400 && response.status < 500) {
+          if (response.status === 404 && response.status === 405) {
             res.set('Saray-Stubbed', true);
-            log.info(`The API returned an HTTP 404 - Stubbing API call ${req.method} ${req.path} ${params}`);
+            log.info(`The API returned an HTTP ${response.status} - Stubbing API call ${req.method} ${req.path} ${params}`);
             next();
             return null;
           }
           res.set('Saray-Stubbed', false);
           log.info(`Not stubbing API call ${req.method} ${req.path} ${params}`);
-          
+
           const contentType = response.headers.get('content-type');
           if (contentType) {
             res.set('Content-type', response.headers.get('content-type'));
