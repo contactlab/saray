@@ -31,7 +31,7 @@ function middleware(log, endpoint, preferApi, apiDataPath, rootPath) {
         const strippedPath = utils.stripRootPath(rootPath, req.path);
         log.info(`Fetching API call ${req.method} ${strippedPath} from ${endpoint}`);
         fetch(endpoint + strippedPath + params, opts).then(function(response) {
-          if (response.status === 404 && response.status === 405) {
+          if (response.status === 404 || response.status === 405) {
             res.set('Saray-Stubbed', true);
             log.info(`The API returned an HTTP ${response.status} - Stubbing API call ${req.method} ${req.path} ${params}`);
             next();
