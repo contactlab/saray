@@ -23,11 +23,9 @@ const getQueryString = function(req) {
 
   // GET and POST parameters object are the same, but they are in different
   // request properties
-  if (req.method === 'GET' || req.method === 'OPTIONS') {
-    rawParams = req.query;
-  } else if (req.method === 'POST') {
-    rawParams = req.body;
-  }
+  // if (req.method === 'GET' || req.method === 'OPTIONS' || req.method === 'POST') {
+  rawParams = req.query;
+  // }
 
   const paramString = getParamsString(rawParams);
   const params = paramString !== '' ? '?' + paramString : '';
