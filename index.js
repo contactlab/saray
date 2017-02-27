@@ -19,7 +19,7 @@ const DEFAULT_LOG_PATH = path.join(__dirname, 'saray.log');
 const DEFAULT_ROOT_PATH = '';
 
 program
-  .version('1.6.0')
+  .version('1.6.1')
   .description('\'Yet Another Rest API Stubber\'.split(\' \').reverse().map(item => item[0].toLowerCase()).join(\'\')')
   .option('--port <port>', 'The port to listen to (default: 8081)', DEFAULT_PORT)
   .option('--path <password>', 'The path for stubbed data (default ./data)', DEFAULT_PATH)
@@ -35,6 +35,7 @@ const log = bunyan.createLogger({
     path: program.log,
   }]
 });
+module.exports.log = log;
 
 const rootPath = program.root;
 module.exports.rootPath = rootPath;
@@ -48,6 +49,9 @@ module.exports.port = port;
 const apiDataPath = path.resolve(program.path);
 module.exports.apiDataPath = apiDataPath;
 
+module.exports.endpoint = program.endpoint;
+module.exports.preferApi = program.preferApi;
+
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({
   extended: true
@@ -57,8 +61,8 @@ app.use(corsMiddleware);
 
 const endpointMiddleware = require('./middlewares/endpoint')(
   log,
-  program.endpoint,
-  program.preferApi,
+  module.exports.endpoint,
+  module.exports.preferApi,
   module.exports.apiDataPath,
   module.exports.rootPath);
 app.use(endpointMiddleware);
@@ -164,11 +168,11 @@ function startExpressServer() {
       ' using base path ' + module.exports.rootPath
     );
 
-    if (program.endpoint) {
-      log.info('using endpoint ' + program.endpoint);
+    if (module.exports.endpoint) {
+      log.info('using endpoint ' + module.exports.endpoint);
     }
 
-    if (program.preferApi) {
+    if (module.exports.preferApi) {
       log.info('preferring API endpoint over stub');
     } else {
       log.info('preferring stub over API endpoint');
