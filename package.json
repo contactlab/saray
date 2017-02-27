@@ -1,6 +1,6 @@
 {
   "name": "saray",
-  "version": "1.6.0",
+  "version": "1.6.1",
   "description": "Contactlab API stubber",
   "main": "index.js",
   "repository": {
@@ -22,7 +22,17 @@
   "homepage": "https://github.com/contactlab/saray#readme",
   "scripts": {
     "start": "saray",
-    "test": "./node_modules/.bin/mocha -u exports test/**/*.js"
+    "saray-with-endpoint": "node index.js --port 8082 --path ./test/data --log saray.log --endpoint http://localhost:8084",
+    "saray-with-prefer-api": "node index.js --port 8083 --path ./test/data --log saray.log --endpoint http://localhost:8084 --pfer-api",
+    "saray-endpoint-service": "node index.js --port 8084 --path ./test/data-endpoint --log saray-endpoint.log",
+    "saray-with-endpoint-rootpath": "node index.js --port 8085 --path ./test/data --log saray.log --endpoint http://localhost:8087 --root '/saray/abc'",
+    "saray-with-prefer-api-rootpath": "node index.js --port 8086 --path ./test/data --log saray.log --endpoint http://localhost:8087 --pfer-api --root '/saray/abc'",
+    "saray-endpoint-service-rootpath": "node index.js --port 8087 --path ./test/data-endpoint --log saray-endpoint.log",
+    "saray-with-endpoint-wrong": "node index.js --port 8088 --path ./test/data --log saray.log --endpoint http://localhost:9000",
+    "saray-with-prefer-api-wrong": "node index.js --port 8089 --path ./test/data --log saray.log --endpoint http://localhost:9000 --pfer-api",
+    "saray-with-prefer-api-rootpath-wrong": "node index.js --port 8090 --path ./test/data --log saray.log --endpoint http://localhost:9000 --pfer-api --root '/saray/abc'",
+    "test-mocha": "./node_modules/.bin/mocha -u exports test/**/*.js",
+    "test": "concurrently 'npm run saray-with-endpoint' 'npm run saray-with-prefer-api' 'npm run saray-endpoint-service' 'npm run saray-with-endpoint-rootpath' 'npm run saray-with-prefer-api-rootpath' 'npm run saray-endpoint-service-rootpath' 'npm run saray-with-endpoint-wrong' 'npm run saray-with-prefer-api-wrong' 'npm run saray-with-prefer-api-rootpath-wrong' 'npm run test-mocha' --kill-others --success first"
   },
   "dependencies": {
     "body-parser": "^1.15.2",
@@ -33,13 +43,14 @@
     "node-fetch": "^1.6.3"
   },
   "devDependencies": {
-    "eslint": "^3.10.2",
+    "concurrently": "^3.3.0",
+    "eslint": "^3.16.1",
     "eslint-config-standard": "^6.2.1",
-    "eslint-plugin-promise": "^3.4.0",
+    "eslint-plugin-promise": "^3.4.2",
     "eslint-plugin-standard": "^2.0.1",
     "express-test": "^0.1.2",
-    "mocha": "^3.0.2",
-    "should": "^11.1.0",
-    "supertest": "^2.0.0"
+    "mocha": "^3.2.0",
+    "should": "^11.2.0",
+    "supertest": "^3.0.0"
   }
 }
