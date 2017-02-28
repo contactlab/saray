@@ -1,3 +1,3 @@
 module.exports = function(req, res, log, next) {
-  res.send(401);
+  res.send(404);
 };
