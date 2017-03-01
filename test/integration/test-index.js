@@ -115,26 +115,14 @@ describe('Integration', function() {
       });
   });
 
-  it('HTTP POST call to a right address with parameters with JSON stubbed data', function(done) {
+  it('HTTP POST call to a right address with parameters returned from the body of the call', function(done) {
     supertest(app.app)
       .post('/call')
       .send({param1: 'value1'})
       .expect(200)
       .end(function(err, response) {
         assert.ok(!err);
-        assert.ok(response.body.keyWithParamPOST === 'value');
-        return done();
-      });
-  });
-
-  it('HTTP POST call to a right address with parameters with JS stubbed data', function(done) {
-    supertest(app.app)
-      .post('/call4')
-      .send({param1: 'value1'})
-      .expect(200)
-      .end(function(err, response) {
-        assert.ok(!err);
-        assert.ok(response.body.keyWithParamPOST === 'value');
+        assert.ok(response.body.param1 === 'value1');
         return done();
       });
   });
@@ -404,7 +392,7 @@ describe('Integration with rootPath', function() {
       .expect(200)
       .end(function(err, response) {
         assert.ok(!err);
-        assert.ok(response.body.keyWithParamPOST === 'value');
+        assert.ok(response.body.param1 === 'value1');
         return done();
       });
   });
@@ -416,7 +404,7 @@ describe('Integration with rootPath', function() {
       .expect(200)
       .end(function(err, response) {
         assert.ok(!err);
-        assert.ok(response.body.keyWithParamPOST === 'value');
+        assert.ok(response.body.param1 === 'value1');
         return done();
       });
   });

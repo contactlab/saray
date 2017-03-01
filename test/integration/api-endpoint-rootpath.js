@@ -151,11 +151,11 @@ describe('Integration with api endpoint with prefer api with rootpath', function
       }).catch(done);
   });
 
-  it('HTTP GET call to a stubbed address by caller, with endpoint that returns a 401', function(done) {
+  it('HTTP GET call to a stubbed address by caller, with endpoint that returns a 404', function(done) {
     const opts = {
       method: 'GET'
     };
-    fetch('http://localhost:8085/saray/abc/call401', opts)
+    fetch('http://localhost:8085/saray/abc/call404', opts)
       .then(function(response) {
         assert.deepEqual(response.headers.get('saray-stubbed'), 'true');
         assert.deepEqual(response.status, 200);
@@ -163,7 +163,7 @@ describe('Integration with api endpoint with prefer api with rootpath', function
       })
       .then(function(response) {
         const j = JSON.parse(response);
-        assert.deepEqual(j.key, 'value 401 stubbed');
+        assert.deepEqual(j.key, 'value 404 stubbed');
         return done();
       });
   });
