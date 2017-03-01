@@ -53,8 +53,7 @@ describe('Unit tests', function() {
       }
     };
     const queryString = utils.getQueryString(req);
-
-    assert.equal(queryString, '?param1=value1&param2=value2');
+    assert.equal(queryString, '');
   });
 
   it('Should generate correctly query string for empty POST calls', function() {
