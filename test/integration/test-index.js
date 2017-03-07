@@ -596,4 +596,125 @@ describe('Integration with dynamic path feature enabled', function() {
         return done();
       });
   });
+
+  it('HTTP POST call to a right address with JSON stubbed data', function(done) {
+    supertest(app.app)
+      .post('/somepath/call')
+      .expect(200)
+      .end(function(err, response) {
+        assert.ok(!err);
+        assert.ok(response.body.key === 'dynpath-value-POST');
+        return done();
+      });
+  });
+
+  it('HTTP GET call to a right address with subpath with JSON stubbed data', function(done) {
+    supertest(app.app)
+      .get('/somepath/somesubpath/call')
+      .expect(200)
+      .end(function(err, response) {
+        assert.ok(!err);
+        assert.ok(response.body.key === 'dynpath-value-subpath');
+        return done();
+      });
+  });
+
+  it('HTTP POST call to a right address with subpath with JSON stubbed data', function(done) {
+    supertest(app.app)
+      .post('/somepath/somesubpath/call')
+      .expect(200)
+      .end(function(err, response) {
+        assert.ok(!err);
+        assert.ok(response.body.key === 'dynpath-value-subpath-POST');
+        return done();
+      });
+  });
+
+  it('HTTP GET call to a right address with JS stubbed data', function(done) {
+    supertest(app.app)
+      .get('/somepath/call2')
+      .expect(200)
+      .end(function(err, response) {
+        assert.ok(!err);
+        assert.ok(response.body.key === 'somepath');
+        return done();
+      });
+  });
+
+  it('HTTP POST call to a right address with JS stubbed data', function(done) {
+    supertest(app.app)
+      .post('/somepath/call2')
+      .expect(200)
+      .end(function(err, response) {
+        assert.ok(!err);
+        assert.ok(response.body.key === 'somepath');
+        return done();
+      });
+  });
+
+  it('HTTP GET call to a right address with subpath with JS stubbed data', function(done) {
+    supertest(app.app)
+      .get('/somepath/somesubpath/call2')
+      .expect(200)
+      .end(function(err, response) {
+        assert.ok(!err);
+        assert.ok(response.body.key === 'somepath somesubpath');
+        return done();
+      });
+  });
+
+  it('HTTP POST call to a right address with subpath with JS stubbed data', function(done) {
+    supertest(app.app)
+      .post('/somepath/somesubpath/call2')
+      .expect(200)
+      .end(function(err, response) {
+        assert.ok(!err);
+        assert.ok(response.body.key === 'somepath somesubpath POST');
+        return done();
+      });
+  });
+
+  it('HTTP GET call to a right address with subpath 2 with JS stubbed data', function(done) {
+    supertest(app.app)
+      .get('/somepath/call/somesubpath/call2')
+      .expect(200)
+      .end(function(err, response) {
+        assert.ok(!err);
+        assert.ok(response.body.key === 'somepath somesubpath');
+        return done();
+      });
+  });
+
+  it('HTTP POST call to a right address with subpath 2 with JS stubbed data', function(done) {
+    supertest(app.app)
+      .post('/somepath/call/somesubpath/call2')
+      .expect(200)
+      .end(function(err, response) {
+        assert.ok(!err);
+        assert.ok(response.body.key === 'somepath somesubpath POST');
+        return done();
+      });
+  });
+
+  it('HTTP GET call to a right address with subpath 2 with JSON stubbed data', function(done) {
+    supertest(app.app)
+      .get('/somepath/call/somesubpath/call')
+      .expect(200)
+      .end(function(err, response) {
+        assert.ok(!err);
+        assert.ok(response.body.key === 'dynpath-value-subpath-2');
+        return done();
+      });
+  });
+
+  it('HTTP POST call to a right address with subpath 2 with JSON stubbed data', function(done) {
+    supertest(app.app)
+      .post('/somepath/call/somesubpath/call')
+      .expect(200)
+      .end(function(err, response) {
+        assert.ok(!err);
+        assert.ok(response.body.key === 'dynpath-value-subpath-2-POST');
+        return done();
+      });
+  });
 });
