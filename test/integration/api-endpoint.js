@@ -2,13 +2,6 @@ const assert = require('assert');
 const fetch = require('node-fetch');
 
 describe('Integration with api endpoint', function() {
-  before(function() {
-    const execSync = require('child_process').execSync;
-    // execSync('node index.js --port 8082 --path ./test/data --log saray.log --endpoint http://localhost:8084');
-    // execSync('node index.js --port 8083 --path ./test/data --log saray.log --endpoint http://localhost:8084 --pfer-api');
-    // execSync('node index.js --port 8084 --path ./test/data-endpoint --log saray-endpoint.log');
-  });
-
   it('HTTP GET call to a stubbed address', function(done) {
     const opts = {
       method: 'GET'
