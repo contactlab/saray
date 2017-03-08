@@ -119,6 +119,19 @@ describe('Integration with api endpoint and dynamic path', function() {
         return done();
       });
   });
+
+  it('HTTP GET call to a not existing address with dynamic path', function(done) {
+    const opts = {
+      method: 'GET'
+    };
+
+    fetch('http://localhost:8091/fakeudid/wrong', opts)
+      .then(function(response) {
+        assert.deepEqual(response.status, 404);
+        assert.deepEqual(response.headers.get('saray-stubbed'), 'true');
+        return done();
+      });
+  });
 });
 
 describe('Integration with api endpoint with prefer api', function() {
@@ -219,5 +232,89 @@ describe('Integration with api endpoint with prefer api', function() {
         assert.deepEqual(j.key, 'value 404 stubbed');
         return done();
       });
+  });
+});
+
+describe('Integration with api endpoint with prefer api and dynamic path', function() {
+  it('HTTP GET call to a stubbed address by endpoint and caller', function(done) {
+    const opts = {
+      method: 'GET'
+    };
+    fetch('http://localhost:8092/realudid/call', opts)
+      .then(function(response) {
+        assert.deepEqual(response.headers.get('saray-stubbed'), 'false');
+        assert.deepEqual(response.status, 200);
+        return response.text();
+      })
+      .then(function(response) {
+        const j = JSON.parse(response);
+        assert.deepEqual(j.key, 'value endpoint path realudid');
+        return done();
+      });
+  });
+
+  it('HTTP GET call to a stubbed address by caller', function(done) {
+    const opts = {
+      method: 'GET'
+    };
+    fetch('http://localhost:8092/somepath/call2', opts)
+      .then(function(response) {
+        assert.deepEqual(response.headers.get('saray-stubbed'), 'true');
+        assert.deepEqual(response.status, 200);
+        return response.text();
+      })
+      .then(function(response) {
+        const j = JSON.parse(response);
+        assert.deepEqual(j.key, 'somepath');
+        return done();
+      });
+  });
+
+  it('HTTP GET call to a stubbed address by endpoint', function(done) {
+    const opts = {
+      method: 'GET'
+    };
+    fetch('http://localhost:8092/realudid/call', opts)
+      .then(function(response) {
+        assert.deepEqual(response.headers.get('saray-stubbed'), 'false');
+        assert.deepEqual(response.status, 200);
+        return response.text();
+      })
+      .then(function(response) {
+        const j = JSON.parse(response);
+        assert.deepEqual(j.key, 'value endpoint path realudid');
+        return done();
+      });
+  });
+
+  it('HTTP GET call to a not stubbed address', function(done) {
+    const opts = {
+      method: 'GET'
+    };
+
+    fetch('http://localhost:8092/somepath/call1', opts)
+      .then(function(response) {
+        assert.deepEqual(response.headers.get('saray-stubbed'), 'true');
+        assert.deepEqual(response.status, 404);
+        return done();
+      });
+  });
+
+  it('HTTP GET call to an address stubbed by the caller and with network problems', function(done) {
+    const opts = {
+      method: 'GET'
+    };
+
+    fetch('http://localhost:8092/somepath/call', opts)
+      .then(function(response) {
+        assert.deepEqual(response.headers.get('saray-stubbed'), 'true');
+        assert.deepEqual(response.status, 200);
+        return response.text();
+      })
+      .then(function(response) {
+        const j = JSON.parse(response);
+        assert.deepEqual(j.key, 'dynpath-value');
+        return done();
+      }).catch(done);
   });
 });

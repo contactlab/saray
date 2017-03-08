@@ -717,6 +717,13 @@ describe('Integration with dynamic path feature enabled', function() {
         return done();
       });
   });
+
+  it('HTTP GET call to a wildcard with JSON stubbed data', function(done) {
+    supertest(app.app)
+      .post('/totallyrandomapi')
+      .expect(404)
+      .end(done);
+  });
 });
 
 describe('Integration with dynamic path feature enabled', function() {
