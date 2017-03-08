@@ -65,6 +65,62 @@ describe('Integration with api endpoint', function() {
   });
 });
 
+describe('Integration with api endpoint and dynamic path', function() {
+  it('HTTP GET call to a stubbed address with dynamic path', function(done) {
+    const opts = {
+      method: 'GET'
+    };
+
+    fetch('http://localhost:8091/fakeudid/call', opts)
+      .then(function(response) {
+        assert.deepEqual(response.status, 200);
+        assert.deepEqual(response.headers.get('saray-stubbed'), 'true');
+        return response.text();
+      })
+      .then(function(response) {
+        const j = JSON.parse(response);
+        assert.deepEqual(j.key, 'dynpath-value');
+        return done();
+      });
+  });
+
+  it('HTTP GET call to a stubbed existing address with dynamic path', function(done) {
+    const opts = {
+      method: 'GET'
+    };
+
+    fetch('http://localhost:8091/realudid/call', opts)
+      .then(function(response) {
+        assert.deepEqual(response.status, 200);
+        assert.deepEqual(response.headers.get('saray-stubbed'), 'false');
+        return response.text();
+      })
+      .then(function(response) {
+        const j = JSON.parse(response);
+        assert.deepEqual(j.key, 'value endpoint path realudid');
+        return done();
+      });
+  });
+
+  it('HTTP GET call to a stubbed existing address with dynamic path using dynamic path string', function(done) {
+    const opts = {
+      method: 'GET'
+    };
+
+    fetch('http://localhost:8091/_/call', opts)
+      .then(function(response) {
+        assert.deepEqual(response.status, 200);
+        assert.deepEqual(response.headers.get('saray-stubbed'), 'true');
+        return response.text();
+      })
+      .then(function(response) {
+        const j = JSON.parse(response);
+        assert.deepEqual(j.key, 'dynpath-value');
+        return done();
+      });
+  });
+});
+
 describe('Integration with api endpoint with prefer api', function() {
   it('HTTP GET call to a stubbed address by endpoint and caller', function(done) {
     const opts = {
