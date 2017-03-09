@@ -234,7 +234,7 @@ describe('Integration with api endpoint with prefer api', function() {
       });
   });
 
-  it('Test issue', function(done) {
+  it('HTTP GET call to a not stubbed address with a param that contain valid JSON - ', function(done) {
     const opts = {
       method: 'GET'
     };
