@@ -233,6 +233,28 @@ describe('Integration with api endpoint with prefer api', function() {
         return done();
       });
   });
+
+  it('Test issue', function(done) {
+    const opts = {
+      method: 'GET'
+    };
+
+    const params = {
+      date: '2017-09-07T16:11:46+0200'
+    };
+    const queryParams = encodeURIComponent(JSON.stringify(params));
+    fetch('http://localhost:8083/jsonQueryString?param=' + queryParams, opts)
+      .then(function(response) {
+        assert.deepEqual(response.headers.get('saray-stubbed'), 'false');
+        assert.deepEqual(response.status, 200);
+        return response.text();
+      })
+      .then(function(response) {
+        const j = JSON.parse(response);
+        assert.deepEqual(j.key, { param: '{"date":"2017-09-07T16:11:46+0200"}' });
+        return done();
+      });
+  });
 });
 
 describe('Integration with api endpoint with prefer api and dynamic path', function() {
