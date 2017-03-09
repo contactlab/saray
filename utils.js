@@ -12,7 +12,7 @@ const allowedMethods = ['GET', 'POST', 'OPTIONS', 'PUT', 'PATCH', 'DELETE'];
 const getParamsString = function(rawParams) {
   return Object.keys(rawParams)
     .reduce((acc, cur) => {
-      acc.push(cur + '=' + rawParams[cur]);
+      acc.push(cur + '=' + encodeURIComponent(rawParams[cur]));
       return acc;
     }, [])
     .join('&');
