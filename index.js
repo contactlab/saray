@@ -17,9 +17,10 @@ const DEFAULT_PORT = 8081;
 const DEFAULT_PATH = path.join(process.cwd(), 'data');
 const DEFAULT_LOG_PATH = path.join(__dirname, 'saray.log');
 const DEFAULT_ROOT_PATH = '';
+const DEFAULT_DYNPATH_STR = null;
 
 program
-  .version('1.6.2')
+  .version('1.7.0')
   .description('\'Yet Another Rest API Stubber\'.split(\' \').reverse().map(item => item[0].toLowerCase()).join(\'\')')
   .option('--port <port>', 'The port to listen to (default: 8081)', DEFAULT_PORT)
   .option('--path <password>', 'The path for stubbed data (default ./data)', DEFAULT_PATH)
@@ -27,6 +28,7 @@ program
   .option('--pfer-api, --prefer-api', 'Prefer API enpoint to stubbed data (default: false)', false)
   .option('--log <log_path>', 'Log file path', DEFAULT_LOG_PATH)
   .option('--root <root_path>', 'The base root path (default: empty)', DEFAULT_ROOT_PATH)
+  .option('--dynpath <dynpath_str>', 'The string used as dynamic folder/file in path. Feature disabled with unset option (default: null)', DEFAULT_DYNPATH_STR)
   .parse(process.argv);
 
 const log = bunyan.createLogger({
@@ -49,6 +51,9 @@ module.exports.port = port;
 const apiDataPath = path.resolve(program.path);
 module.exports.apiDataPath = apiDataPath;
 
+const dynPath = program.dynpath;
+module.exports.dynPath = dynPath;
+
 module.exports.endpoint = program.endpoint;
 module.exports.preferApi = program.preferApi;
 
@@ -66,6 +71,58 @@ const endpointMiddleware = require('./middlewares/endpoint')(
   module.exports.apiDataPath,
   module.exports.rootPath);
 app.use(endpointMiddleware);
+
+
+function seekFileFallback(apiDataPath, reqPath, dynPath, req, ext, params)
+{
+  if (!reqPath) {
+    return false;
+  }
+  let seekingPath = path.join(apiDataPath, `${reqPath}${params}.${req.method}.${ext}`);
+  if (fs.existsSync(seekingPath)) {
+    return seekingPath;
+  }
+  let paths = reqPath.split('/');
+  let pathParams = [];
+  let actualPath = [];
+  while (paths.length > 0) {
+    let p = paths.shift();
+    if (p === '') {
+      actualPath.push(p);
+      continue;
+    }
+    let isFile = paths.length === 0;
+    let part = p;
+    if (isFile) {
+      part = `${p}${params}.${req.method}.${ext}`;
+    }
+    seekingPath = path.join(apiDataPath, `${actualPath.join('/')}/${part}`);
+    if (!fs.existsSync(seekingPath)) {
+      if (isFile) {
+        part = `${dynPath}${params}.${req.method}.${ext}`;
+      } else {
+        part = `${dynPath}`;
+      }
+      seekingPath = path.join(apiDataPath, `${actualPath.join('/')}/${part}`);
+      if (!fs.existsSync(seekingPath)) {
+        seekingPath = false;
+      } else {
+        pathParams.push(p);
+      }
+    }
+    if (seekingPath !== false) {
+      if (isFile) {
+        req.dynamicPathParams = pathParams;
+        return seekingPath;
+      } else {
+        actualPath.push(part);
+      }
+    } else {
+      return false;
+    }
+  }
+  return false;
+}
 
 function loadJSFile(filePath, req, res, log, next) {
   log.info(`Loading data from ${filePath}`);
@@ -109,6 +166,10 @@ function loadJSONFile(filePath, req, res, log) {
 sarayRouter.all('/*', function(req, res, next) {
   const params = utils.getQueryString(req);
 
+  if (module.exports.dynpath) {
+    req.dynamicPathParams = [];
+  }
+
   if (req.method === 'OPTIONS') {
     const methods = utils.reallyAllowedMethods(
       req,
@@ -132,12 +193,41 @@ sarayRouter.all('/*', function(req, res, next) {
   const jsFilePath = path.join(module.exports.apiDataPath, strippedPath + '.' + req.method + '.js');
   const jsFilePathWithParams = path.join(module.exports.apiDataPath, strippedPath + params + '.' + req.method + '.js');
 
+  let filePath = null;
+
   if (fs.existsSync(jsFilePathWithParams)) {
     loadJSFile(jsFilePathWithParams, req, res, log, next);
   } else if (fs.existsSync(jsFilePath)) {
     loadJSFile(jsFilePath, req, res, log, next);
   } else if (fs.existsSync(jsonFilePath)) {
     loadJSONFile(jsonFilePath, req, res, log);
+  } else if (module.exports.dynPath && ( filePath = seekFileFallback(
+        module.exports.apiDataPath,
+        strippedPath,
+        module.exports.dynPath,
+        req,
+        'js',
+        params
+      ))) {
+    loadJSFile(filePath, req, res, log, next);
+  } else if (module.exports.dynPath && (filePath = seekFileFallback(
+        module.exports.apiDataPath,
+        strippedPath,
+        module.exports.dynPath,
+        req,
+        'js',
+        ''
+      ))) {
+    loadJSFile(filePath, req, res, log, next);
+  } else if (module.exports.dynPath && (filePath = seekFileFallback(
+        module.exports.apiDataPath,
+        strippedPath,
+        module.exports.dynPath,
+        req,
+        'json',
+        params
+      ))) {
+    loadJSONFile(filePath, req, res, log);
   } else {
     log.error('Probably this is not the API response you are looking for, missing JSON file for ' + req.path);
     res.status(404).json({
