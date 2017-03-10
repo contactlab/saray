@@ -1,6 +1,6 @@
 {
   "name": "saray",
-  "version": "1.6.2",
+  "version": "1.7.0",
   "description": "Contactlab API stubber",
   "main": "index.js",
   "repository": {
