@@ -15,7 +15,7 @@ const app = express();
 
 const DEFAULT_PORT = 8081;
 const DEFAULT_PATH = path.join(process.cwd(), 'data');
-const DEFAULT_LOG_PATH = path.join(__dirname, 'saray.log');
+const DEFAULT_LOG_PATH = path.resolve('saray.log');
 const DEFAULT_ROOT_PATH = '';
 const DEFAULT_DYNPATH_STR = null;
 
@@ -26,7 +26,7 @@ program
   .option('--path <password>', 'The path for stubbed data (default ./data)', DEFAULT_PATH)
   .option('--endpoint <endpoint>', 'The endpoint (default null)', null)
   .option('--pfer-api, --prefer-api', 'Prefer API enpoint to stubbed data (default: false)', false)
-  .option('--log <log_path>', 'Log file path', DEFAULT_LOG_PATH)
+  .option('--log <log_path>', 'Log file path (default: working directory)', DEFAULT_LOG_PATH)
   .option('--root <root_path>', 'The base root path (default: empty)', DEFAULT_ROOT_PATH)
   .option('--dynpath <dynpath_str>', 'The string used as dynamic folder/file in path. Feature disabled with unset option (default: null)', DEFAULT_DYNPATH_STR)
   .parse(process.argv);
