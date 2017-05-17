@@ -1,4 +1,6 @@
 const assert = require('assert');
+const path = require('path');
+
 const utils = require('../../utils');
 const corsMiddleware = require('../../middlewares/cors');
 
@@ -81,5 +83,11 @@ describe('Unit tests', function() {
     const finalExpectedHeaders = allowedHeaders + ', ' + requestHeaders;
     const finalComputedHeaders = corsMiddleware.updateCORSAllowedHeaders(requestHeaders, allowedHeaders);
     assert.equal(finalExpectedHeaders, finalComputedHeaders);
+  });
+
+  it('Should encode correctly a file path', function() {
+    const filePath = path.join('this', 'is', 'a', 'path?par=val&par2=val2');
+    const encodedPath = utils.encodeFilePath(filePath);
+    assert.equal(encodedPath, 'this/is/a/path%3Fpar%3Dval%26par2%3Dval2');
   });
 });

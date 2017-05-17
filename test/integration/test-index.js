@@ -271,6 +271,28 @@ describe('Integration', function() {
         return done();
       });
   });
+
+  it('HTTP GET call to a right address with parameters with JSON stubbed data and a filesystem name compatible with Windows', function(done) {
+    supertest(app.app)
+      .get('/call7?param1=value1')
+      .expect(200)
+      .end(function(err, response) {
+        assert.ok(!err);
+        assert.deepEqual(response.body.key, 'value windows compatible');
+        return done();
+      });
+  });
+
+  it('HTTP GET call to a right address with parameters with JS stubbed data and a filesystem name compatible with Windows', function(done) {
+    supertest(app.app)
+      .get('/call8?param1=value1')
+      .expect(200)
+      .end(function(err, response) {
+        assert.ok(!err);
+        assert.deepEqual(response.body.key, 'value windows compatible');
+        return done();
+      });
+  });
 });
 
 describe('Integration with rootPath', function() {
