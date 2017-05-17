@@ -59,10 +59,16 @@ const reallyAllowedMethods = function(req, params, apiDataPath, rootPath) {
   });
 };
 
+const encodeFilePath = function(filePath) {
+  const baseName = path.basename(filePath);
+  return path.join(path.dirname(filePath), encodeURIComponent(baseName));
+};
+
 module.exports = {
   allowedMethods: allowedMethods,
   getParamsString: getParamsString,
   getQueryString: getQueryString,
   reallyAllowedMethods: reallyAllowedMethods,
   stripRootPath: stripRootPath,
+  encodeFilePath: encodeFilePath
 };
