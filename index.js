@@ -163,6 +163,25 @@ function loadJSONFile(filePath, req, res, log) {
   });
 }
 
+const errorStatusCodesMap = {
+  '200': 404,
+  '408': 408
+};
+
+function handleErrorStatusCode(code) {
+  return errorStatusCodesMap[code.toString()];
+}
+
+
+function handleErrorMessage(code, extra) {
+  const errorMessageStatusCodeMap = {
+    '404': `Probably this is not the API response you are looking for, missing JSON file for ${extra}`,
+    '408': `Timeout for API call ${extra}`
+  };
+
+  return errorMessageStatusCodeMap[code];
+}
+
 sarayRouter.all('/*', function(req, res, next) {
   const params = utils.getQueryString(req);
 
@@ -229,9 +248,11 @@ sarayRouter.all('/*', function(req, res, next) {
       ))) {
     loadJSONFile(filePath, req, res, log);
   } else {
-    log.error('Probably this is not the API response you are looking for, missing JSON file for ' + req.path);
-    res.status(404).json({
-      error: 'Probably this is not the API response you are looking for, missing JSON file for ' + req.path
+    const code = handleErrorStatusCode(res.statusCode);
+    const message = handleErrorMessage(code, req.path);
+    log.error(message);
+    res.status(code).json({
+      error: message
     });
     return;
   }
