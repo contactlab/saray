@@ -1,7 +1,7 @@
 const utils = require('../utils');
 const fetch = require('node-fetch');
 
-function middleware(log, endpoint, preferApi, apiDataPath, rootPath) {
+function middleware(log, endpoint, preferApi, apiDataPath, rootPath, timeout) {
   return function endpointMiddleware(req, res, next) {
     if (endpoint !== null) {
       log.info('Endpoint is not null');
@@ -22,7 +22,7 @@ function middleware(log, endpoint, preferApi, apiDataPath, rootPath) {
         const opts = {
           method: req.method,
           headers: headers,
-          timeout: 60000
+          timeout: timeout
         };
 
         if (req.method === 'POST' || req.method === 'PATCH' || req.method === 'PUT') {

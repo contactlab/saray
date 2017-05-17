@@ -18,17 +18,19 @@ const DEFAULT_PATH = path.join(process.cwd(), 'data');
 const DEFAULT_LOG_PATH = path.resolve('saray.log');
 const DEFAULT_ROOT_PATH = '';
 const DEFAULT_DYNPATH_STR = null;
+const DEFAULT_TIMEOUT = 60000;
 
 program
   .version('1.7.0')
   .description('\'Yet Another Rest API Stubber\'.split(\' \').reverse().map(item => item[0].toLowerCase()).join(\'\')')
-  .option('--port <port>', 'The port to listen to (default: 8081)', DEFAULT_PORT)
-  .option('--path <password>', 'The path for stubbed data (default ./data)', DEFAULT_PATH)
-  .option('--endpoint <endpoint>', 'The endpoint (default null)', null)
+  .option('--port <integer>', 'The port to listen to (default: 8081)', DEFAULT_PORT)
+  .option('--path <string>', 'The path for stubbed data (default ./data)', DEFAULT_PATH)
+  .option('--endpoint <string>', 'The endpoint (default null)', null)
   .option('--pfer-api, --prefer-api', 'Prefer API enpoint to stubbed data (default: false)', false)
-  .option('--log <log_path>', 'Log file path (default: working directory)', DEFAULT_LOG_PATH)
-  .option('--root <root_path>', 'The base root path (default: empty)', DEFAULT_ROOT_PATH)
-  .option('--dynpath <dynpath_str>', 'The string used as dynamic folder/file in path. Feature disabled with unset option (default: null)', DEFAULT_DYNPATH_STR)
+  .option('--log <string>', 'Log file path (default: working directory)', DEFAULT_LOG_PATH)
+  .option('--root <string>', 'The base root path (default: empty)', DEFAULT_ROOT_PATH)
+  .option('--dynpath <string>', 'The string used as dynamic folder/file in path. Feature disabled with unset option (default: null)', DEFAULT_DYNPATH_STR)
+  .option('--timeout <milliseconds>', 'The timeout to wait for endpoint before Saray respond with an HTTP 408', DEFAULT_TIMEOUT)
   .parse(process.argv);
 
 const log = bunyan.createLogger({
@@ -54,6 +56,9 @@ module.exports.apiDataPath = apiDataPath;
 const dynPath = program.dynpath;
 module.exports.dynPath = dynPath;
 
+const timeout = program.timeout;
+module.exports.timeout = timeout;
+
 module.exports.endpoint = program.endpoint;
 module.exports.preferApi = program.preferApi;
 
@@ -69,7 +74,8 @@ const endpointMiddleware = require('./middlewares/endpoint')(
   module.exports.endpoint,
   module.exports.preferApi,
   module.exports.apiDataPath,
-  module.exports.rootPath);
+  module.exports.rootPath,
+  module.exports.timeout);
 app.use(endpointMiddleware);
 
 
