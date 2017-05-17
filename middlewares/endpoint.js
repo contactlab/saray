@@ -21,7 +21,8 @@ function middleware(log, endpoint, preferApi, apiDataPath, rootPath) {
         delete headers.host;
         const opts = {
           method: req.method,
-          headers: headers
+          headers: headers,
+          timeout: 60000
         };
 
         if (req.method === 'POST' || req.method === 'PATCH' || req.method === 'PUT') {
@@ -51,8 +52,13 @@ function middleware(log, endpoint, preferApi, apiDataPath, rootPath) {
           if (text !== null) {
             res.send(text);
           }
-        }).catch(function() {
-          log.info(`Error with API call ${req.method} ${req.path} from ${endpoint}`);
+        }).catch(function(reason) {
+          if (reason.type === 'request-timeout') {
+            log.info(`Timeout for API call ${req.method} ${req.path} from ${endpoint}`);
+            res.status(408);
+          } else {
+            log.info(`Error for API call ${req.method} ${req.path} from ${endpoint}`);
+          }
           res.set('Saray-Stubbed', true);
           log.info(`There was a network error through the endpoint - Stubbing API call ${req.method} ${req.path} ${params}`);
           next();
