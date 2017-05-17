@@ -135,6 +135,7 @@ describe('Integration with api endpoint and dynamic path', function() {
 });
 
 describe('Integration with api endpoint with prefer api', function() {
+  this.timeout(70000);
   it('HTTP GET call to a stubbed address by endpoint and caller', function(done) {
     const opts = {
       method: 'GET'
@@ -182,6 +183,18 @@ describe('Integration with api endpoint with prefer api', function() {
       .then(function(response) {
         const j = JSON.parse(response);
         assert.deepEqual(j.key, 'value endpoint not stubbed by caller');
+        return done();
+      });
+  });
+
+  it('HTTP GET call to a stubbed (?) address by and endpoint that\'s not reachable', function(done) {
+    const opts = {
+      method: 'GET'
+    };
+    fetch('http://localhost:8083/timeout', opts)
+      .then(function(response) {
+        assert.deepEqual(response.headers.get('saray-stubbed'), 'true');
+        assert.deepEqual(response.status, 408);
         return done();
       });
   });

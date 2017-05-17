@@ -15,20 +15,22 @@ const app = express();
 
 const DEFAULT_PORT = 8081;
 const DEFAULT_PATH = path.join(process.cwd(), 'data');
-const DEFAULT_LOG_PATH = path.join(__dirname, 'saray.log');
+const DEFAULT_LOG_PATH = path.resolve('saray.log');
 const DEFAULT_ROOT_PATH = '';
 const DEFAULT_DYNPATH_STR = null;
+const DEFAULT_TIMEOUT = 60000;
 
 program
-  .version('1.7.0')
+  .version('1.7.1')
   .description('\'Yet Another Rest API Stubber\'.split(\' \').reverse().map(item => item[0].toLowerCase()).join(\'\')')
-  .option('--port <port>', 'The port to listen to (default: 8081)', DEFAULT_PORT)
-  .option('--path <password>', 'The path for stubbed data (default ./data)', DEFAULT_PATH)
-  .option('--endpoint <endpoint>', 'The endpoint (default null)', null)
+  .option('--port <integer>', 'The port to listen to (default: 8081)', DEFAULT_PORT)
+  .option('--path <string>', 'The path for stubbed data (default ./data)', DEFAULT_PATH)
+  .option('--endpoint <string>', 'The endpoint (default null)', null)
   .option('--pfer-api, --prefer-api', 'Prefer API enpoint to stubbed data (default: false)', false)
-  .option('--log <log_path>', 'Log file path', DEFAULT_LOG_PATH)
-  .option('--root <root_path>', 'The base root path (default: empty)', DEFAULT_ROOT_PATH)
-  .option('--dynpath <dynpath_str>', 'The string used as dynamic folder/file in path. Feature disabled with unset option (default: null)', DEFAULT_DYNPATH_STR)
+  .option('--log <string>', 'Log file path (default: working directory)', DEFAULT_LOG_PATH)
+  .option('--root <string>', 'The base root path (default: empty)', DEFAULT_ROOT_PATH)
+  .option('--dynpath <string>', 'The string used as dynamic folder/file in path. Feature disabled with unset option (default: null)', DEFAULT_DYNPATH_STR)
+  .option('--timeout <milliseconds>', 'The timeout to wait for endpoint before Saray respond with an HTTP 408', DEFAULT_TIMEOUT)
   .parse(process.argv);
 
 const log = bunyan.createLogger({
@@ -54,6 +56,9 @@ module.exports.apiDataPath = apiDataPath;
 const dynPath = program.dynpath;
 module.exports.dynPath = dynPath;
 
+const timeout = program.timeout;
+module.exports.timeout = timeout;
+
 module.exports.endpoint = program.endpoint;
 module.exports.preferApi = program.preferApi;
 
@@ -69,7 +74,8 @@ const endpointMiddleware = require('./middlewares/endpoint')(
   module.exports.endpoint,
   module.exports.preferApi,
   module.exports.apiDataPath,
-  module.exports.rootPath);
+  module.exports.rootPath,
+  module.exports.timeout);
 app.use(endpointMiddleware);
 
 
@@ -163,6 +169,25 @@ function loadJSONFile(filePath, req, res, log) {
   });
 }
 
+const errorStatusCodesMap = {
+  '200': 404,
+  '408': 408
+};
+
+function handleErrorStatusCode(code) {
+  return errorStatusCodesMap[code.toString()];
+}
+
+
+function handleErrorMessage(code, extra) {
+  const errorMessageStatusCodeMap = {
+    '404': `Probably this is not the API response you are looking for, missing JSON file for ${extra}`,
+    '408': `Timeout for API call ${extra}`
+  };
+
+  return errorMessageStatusCodeMap[code];
+}
+
 sarayRouter.all('/*', function(req, res, next) {
   const params = utils.getQueryString(req);
 
@@ -192,15 +217,21 @@ sarayRouter.all('/*', function(req, res, next) {
   const jsonFilePath = path.join(module.exports.apiDataPath, strippedPath + params + '.' + req.method + '.json');
   const jsFilePath = path.join(module.exports.apiDataPath, strippedPath + '.' + req.method + '.js');
   const jsFilePathWithParams = path.join(module.exports.apiDataPath, strippedPath + params + '.' + req.method + '.js');
+  const encodedJsFileWithParams = utils.encodeFilePath(jsFilePathWithParams);
+  const encodedJsonFilePath = utils.encodeFilePath(jsonFilePath);
 
   let filePath = null;
 
   if (fs.existsSync(jsFilePathWithParams)) {
     loadJSFile(jsFilePathWithParams, req, res, log, next);
+  } else if (fs.existsSync(encodedJsFileWithParams)) {
+    loadJSFile(encodedJsFileWithParams, req, res, log, next);
   } else if (fs.existsSync(jsFilePath)) {
     loadJSFile(jsFilePath, req, res, log, next);
   } else if (fs.existsSync(jsonFilePath)) {
     loadJSONFile(jsonFilePath, req, res, log);
+  } else if (fs.existsSync(encodedJsonFilePath)) {
+    loadJSONFile(encodedJsonFilePath, req, res, log);
   } else if (module.exports.dynPath && ( filePath = seekFileFallback(
         module.exports.apiDataPath,
         strippedPath,
@@ -229,9 +260,11 @@ sarayRouter.all('/*', function(req, res, next) {
       ))) {
     loadJSONFile(filePath, req, res, log);
   } else {
-    log.error('Probably this is not the API response you are looking for, missing JSON file for ' + req.path);
-    res.status(404).json({
-      error: 'Probably this is not the API response you are looking for, missing JSON file for ' + req.path
+    const code = handleErrorStatusCode(res.statusCode);
+    const message = handleErrorMessage(code, req.path);
+    log.error(message);
+    res.status(code).json({
+      error: message
     });
     return;
   }

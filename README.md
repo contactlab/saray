@@ -119,6 +119,11 @@ http://mydomain:port/give/them/her/data
 
 and for all these calls Saray will respond with the stubbed data precedently defined.
 
+## Endpoint timeout
+
+From version 1.7.1 it is possible to set a timeout (default to 60 seconds) for a better handling of the endpoint option.
+With this parameter Saray can handle a pending call to the endpoint (the one specified with the --endpoint flag) with a timeout handler and, in case, return an HTTP 408.
+
 ## Installation & run
 
 You can install Saray with npm or yarn
