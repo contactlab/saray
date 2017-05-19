@@ -2,8 +2,8 @@ const supertest = require('supertest');
 const assert = require('assert');
 const path = require('path');
 const fs = require('fs');
-const app = require('../../index');
-const utils = require('../../utils');
+const app = require('../../src/index');
+const utils = require('../../src/utils');
 
 describe('Integration', function() {
   before(function() {
