@@ -1,8 +1,8 @@
 const assert = require('assert');
 const path = require('path');
 
-const utils = require('../../utils');
-const corsMiddleware = require('../../middlewares/cors');
+const utils = require('../../src/utils');
+const corsMiddleware = require('../../src/middlewares/cors');
 
 describe('Unit tests', function() {
   it('Should parse correctly URL parameters', function() {

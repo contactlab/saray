@@ -2,7 +2,7 @@
   "name": "saray",
   "version": "1.7.1",
   "description": "Contactlab API stubber",
-  "main": "index.js",
+  "main": "src/index.js",
   "repository": {
     "type": "git",
     "url": "https://github.com/contactlab/saray"
@@ -21,20 +21,20 @@
   },
   "homepage": "https://github.com/contactlab/saray#readme",
   "scripts": {
-    "start": "saray",
-    "saray-with-endpoint": "node index.js --port 8082 --path ./test/data --log saray.log --endpoint http://localhost:8084",
-    "saray-with-prefer-api": "node index.js --port 8083 --path ./test/data --log saray.log --endpoint http://localhost:8084 --pfer-api",
-    "saray-endpoint-service": "node index.js --port 8084 --path ./test/data-endpoint --log saray-endpoint.log",
-    "saray-with-endpoint-rootpath": "node index.js --port 8085 --path ./test/data --log saray.log --endpoint http://localhost:8087 --root '/saray/abc'",
-    "saray-with-prefer-api-rootpath": "node index.js --port 8086 --path ./test/data --log saray.log --endpoint http://localhost:8087 --pfer-api --root '/saray/abc'",
-    "saray-endpoint-service-rootpath": "node index.js --port 8087 --path ./test/data-endpoint --log saray-endpoint.log",
-    "saray-with-endpoint-wrong": "node index.js --port 8088 --path ./test/data --log saray.log --endpoint http://localhost:9000",
-    "saray-with-prefer-api-wrong": "node index.js --port 8089 --path ./test/data --log saray.log --endpoint http://localhost:9000 --pfer-api",
-    "saray-with-prefer-api-rootpath-wrong": "node index.js --port 8090 --path ./test/data --log saray.log --endpoint http://localhost:9000 --pfer-api --root '/saray/abc'",
-    "saray-with-endpoint-dynamic": "node index.js --port 8091 --path ./test/data --log saray.log --endpoint http://localhost:8084 --dynpath='_'",
-    "saray-with-prefer-api-dynamic": "node index.js --port 8092 --path ./test/data --log saray.log --endpoint http://localhost:8084 --pfer-api --dynpath='_'",
+    "start": "node src/index.js",
+    "saray-with-endpoint": "node src/index.js --port 8082 --path ./test/data --log saray.log --endpoint http://localhost:8084",
+    "saray-with-prefer-api": "node src/index.js --port 8083 --path ./test/data --log saray.log --endpoint http://localhost:8084 --pfer-api",
+    "saray-endpoint-service": "node src/index.js --port 8084 --path ./test/data-endpoint --log saray-endpoint.log",
+    "saray-with-endpoint-rootpath": "node src/index.js --port 8085 --path ./test/data --log saray.log --endpoint http://localhost:8087 --root '/saray/abc'",
+    "saray-with-prefer-api-rootpath": "node src/index.js --port 8086 --path ./test/data --log saray.log --endpoint http://localhost:8087 --pfer-api --root '/saray/abc'",
+    "saray-endpoint-service-rootpath": "node src/index.js --port 8087 --path ./test/data-endpoint --log saray-endpoint.log",
+    "saray-with-endpoint-wrong": "node src/index.js --port 8088 --path ./test/data --log saray.log --endpoint http://localhost:9000",
+    "saray-with-prefer-api-wrong": "node src/index.js --port 8089 --path ./test/data --log saray.log --endpoint http://localhost:9000 --pfer-api",
+    "saray-with-prefer-api-rootpath-wrong": "node src/index.js --port 8090 --path ./test/data --log saray.log --endpoint http://localhost:9000 --pfer-api --root '/saray/abc'",
+    "saray-with-endpoint-dynamic": "node src/index.js --port 8091 --path ./test/data --log saray.log --endpoint http://localhost:8084 --dynpath='_'",
+    "saray-with-prefer-api-dynamic": "node src/index.js --port 8092 --path ./test/data --log saray.log --endpoint http://localhost:8084 --pfer-api --dynpath='_'",
     "test-mocha": "./node_modules/.bin/mocha -u exports test/**/*.js",
-    "test": "concurrently 'npm run saray-with-endpoint' 'npm run saray-with-prefer-api' 'npm run saray-endpoint-service' 'npm run saray-with-endpoint-rootpath' 'npm run saray-with-prefer-api-rootpath' 'npm run saray-endpoint-service-rootpath' 'npm run saray-with-endpoint-wrong' 'npm run saray-with-prefer-api-wrong' 'npm run saray-with-prefer-api-rootpath-wrong' 'npm run saray-with-endpoint-dynamic' 'npm run saray-with-prefer-api-dynamic' 'npm run test-mocha' --kill-others --success first"
+    "test": "concurrently \"npm run saray-with-endpoint\" \"npm run saray-with-prefer-api\" \"npm run saray-endpoint-service\" \"npm run saray-with-endpoint-rootpath\" \"npm run saray-with-prefer-api-rootpath\" \"npm run saray-endpoint-service-rootpath\" \"npm run saray-with-endpoint-wrong\" \"npm run saray-with-prefer-api-wrong\" \"npm run saray-with-prefer-api-rootpath-wrong\" \"npm run saray-with-endpoint-dynamic\" \"npm run saray-with-prefer-api-dynamic\" \"npm run test-mocha\" --kill-others --success first"
   },
   "dependencies": {
     "body-parser": "^1.15.2",
