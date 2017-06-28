@@ -1,6 +1,6 @@
 {
   "name": "saray",
-  "version": "1.7.2",
+  "version": "1.7.3",
   "description": "Contactlab API stubber",
   "main": "src/index.js",
   "repository": {
@@ -17,7 +17,7 @@
   "author": "Contactlab Product Team",
   "license": "Apache-2.0",
   "bin": {
-    "saray": "./index.js"
+    "saray": "./src/index.js"
   },
   "homepage": "https://github.com/contactlab/saray#readme",
   "scripts": {
