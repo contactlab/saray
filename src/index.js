@@ -7,6 +7,7 @@ const fs = require('fs');
 const path = require('path');
 const process = require('process');
 const program = require('commander');
+const bformat = require('bunyan-format');
 
 const utils = require('./utils');
 const corsMiddleware = require('./middlewares/cors').cors;
@@ -33,11 +34,18 @@ program
   .option('--timeout <milliseconds>', 'The timeout to wait for endpoint before Saray respond with an HTTP 408', DEFAULT_TIMEOUT)
   .parse(process.argv);
 
+const formatOut = bformat({ outputMode: 'short' });
 const log = bunyan.createLogger({
   name: 'saray',
-  streams: [{
-    path: program.log,
-  }]
+  streams: [
+    {
+      level: 'info',
+      stream: formatOut
+    },
+    {
+      path: program.log,
+    }
+  ]
 });
 module.exports.log = log;
 
