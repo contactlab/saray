@@ -4,6 +4,7 @@ const path = require('path');
 const fs = require('fs');
 const app = require('../../src/index');
 const utils = require('../../src/utils');
+const fetch = require('node-fetch');
 
 describe('Integration', function() {
   before(function() {
@@ -11,204 +12,271 @@ describe('Integration', function() {
   });
 
   it('HTTP GET call to a wrong address', function(done) {
-    supertest(app.app)
-      .get('/wrong')
-      .expect(404)
-      .end(done);
+    const opts = {
+      method: 'GET'
+    };
+    fetch('http://localhost:8093/wrong', opts)
+      .then(function(response) {
+        assert.deepEqual(response.status, 404);
+        done();
+      });
   });
 
   it('HTTP GET CORS call to a right address with JSON stubbed data', function(done) {
-    supertest(app.app)
-      .options('/call')
-      .set('Origin', 'http://saray.example.com')
-      .set('custom-header1', 'custom-value1')
-      .set('custom-header2', 'custom-value2')
-      .set('Access-Control-Request-Headers', 'custom-header1, custom-header2')
-      .set('Access-Control-Request-Method', 'GET')
-      .expect(200)
-      .end(function(err, response) {
-        assert.ok(!err);
+    const opts = {
+      method: 'GET',
+      headers: {
+        'Origin': 'http://saray.example.com',
+        'custom-header1': 'custom-value1',
+        'custom-header2': 'custom-value2',
+        'Access-Control-Request-Headers': 'custom-header1, custom-header2',
+        'Access-Control-Request-Method': 'GET'
+      }
+    };
+    fetch('http://localhost:8093/call', opts)
+      .then(function(response) {
         assert.ok(
-          response.headers['access-control-allow-headers'] === 'Origin, X-Requested-With, Content-Type, Accept, Authorization, custom-header1, custom-header2'
+          response.headers.get('access-control-allow-headers') === 'Origin, X-Requested-With, Content-Type, Accept, Authorization, custom-header1, custom-header2'
         );
-        return done();
+        done();
       });
   });
 
   it('HTTP GET call to a right address with JSON stubbed data', function(done) {
-    supertest(app.app)
-      .get('/call')
-      .expect(200)
-      .end(function(err, response) {
-        assert.ok(!err);
-        assert.ok(response.body.key === 'value');
-        return done();
+    const opts = {
+      method: 'GET'
+    };
+    fetch('http://localhost:8093/call', opts)
+      .then(function(response) {
+        assert.deepEqual(response.status, 200);
+        assert.deepEqual(response.headers.get('saray-stubbed'), 'true');
+        return response.text();
+      })
+      .then(function(responseText) {
+        const j = JSON.parse(responseText);
+        assert.ok(j.key === 'value');
+        done();
       });
   });
 
   it('HTTP GET call to a right address with JS stubbed data', function(done) {
-    supertest(app.app)
-      .get('/call4')
-      .expect(200)
-      .end(function(err, response) {
-        assert.ok(!err);
-        assert.ok(response.body.key === 'value');
-        return done();
+    const opts = {
+      method: 'GET'
+    };
+    fetch('http://localhost:8093/call4', opts)
+      .then(function(response) {
+        assert.deepEqual(response.status, 200);
+        assert.deepEqual(response.headers.get('saray-stubbed'), 'true');
+        return response.text();
+      })
+      .then(function(responseText) {
+        const j = JSON.parse(responseText);
+        assert.ok(j.key === 'value');
+        done();
       });
   });
 
   it('HTTP GET call to a right address with parameters with JSON stubbed data', function(done) {
-    supertest(app.app)
-      .get('/call?param1=value1')
-      .expect(200)
-      .end(function(err, response) {
-        assert.ok(!err);
-        assert.ok(response.body.keyWithParam === 'value');
-        return done();
+    const opts = {
+      method: 'GET'
+    };
+    fetch('http://localhost:8093/call?param1=value1', opts)
+      .then(function(response) {
+        assert.deepEqual(response.status, 200);
+        assert.deepEqual(response.headers.get('saray-stubbed'), 'true');
+        return response.text();
+      })
+      .then(function(responseText) {
+        const j = JSON.parse(responseText);
+        assert.ok(j.keyWithParam === 'value');
+        done();
       });
   });
 
   it('HTTP GET call to a right address with parameters with JS stubbed data', function(done) {
-    supertest(app.app)
-      .get('/call4?param1=value1')
-      .expect(200)
-      .end(function(err, response) {
-        assert.ok(!err);
-        assert.ok(response.body.keyWithParam === 'value');
-        return done();
+    const opts = {
+      method: 'GET'
+    };
+    fetch('http://localhost:8093/call4?param1=value1', opts)
+      .then(function(response) {
+        assert.deepEqual(response.status, 200);
+        assert.deepEqual(response.headers.get('saray-stubbed'), 'true');
+        return response.text();
+      })
+      .then(function(responseText) {
+        const j = JSON.parse(responseText);
+        assert.ok(j.keyWithParam === 'value');
+        done();
       });
   });
 
   it('HTTP GET call to a malformed JSON', function(done) {
-    supertest(app.app)
-      .get('/malformed')
-      .expect(500)
-      .end(done);
+    const opts = {
+      method: 'GET'
+    };
+    fetch('http://localhost:8093/malformed', opts)
+      .then(function(response) {
+        assert.deepEqual(response.status, 500);
+        assert.deepEqual(response.headers.get('saray-stubbed'), 'true');
+        done();
+      });
   });
 
   it('HTTP POST call to a wrong address', function(done) {
-    supertest(app.app)
-      .post('/wrong')
-      .expect(404)
-      .end(done);
+    const opts = {
+      method: 'POST'
+    };
+    fetch('http://localhost:8093/wrong', opts)
+      .then(function(response) {
+        assert.deepEqual(response.status, 404);
+        assert.deepEqual(response.headers.get('saray-stubbed'), 'true');
+        done();
+      });
   });
 
   it('HTTP POST call to a right address with JSON stubbed data', function(done) {
-    supertest(app.app)
-      .post('/call')
-      .expect(200)
-      .end(function(err, response) {
-        assert.ok(!err);
-        assert.ok(response.body.keyPOST === 'value');
-        return done();
+    const opts = {
+      method: 'POST'
+    };
+    fetch('http://localhost:8093/call', opts)
+      .then(function(response) {
+        assert.deepEqual(response.status, 200);
+        assert.deepEqual(response.headers.get('saray-stubbed'), 'true');
+        return response.text();
+      })
+      .then(function(responseText) {
+        const j = JSON.parse(responseText);
+        assert.ok(j.keyPOST === 'value');
+        done();
       });
   });
 
   it('HTTP POST call to a right address with JS stubbed data', function(done) {
-    supertest(app.app)
-      .post('/call4')
-      .expect(200)
-      .end(function(err, response) {
-        assert.ok(!err);
-        assert.ok(response.body.keyPOST === 'value');
-        return done();
-      });
-  });
-
-  it('HTTP POST call to a right address with parameters returned from the body of the call', function(done) {
-    supertest(app.app)
-      .post('/call')
-      .send({param1: 'value1'})
-      .expect(200)
-      .end(function(err, response) {
-        assert.ok(!err);
-        assert.ok(response.body.param1 === 'value1');
-        return done();
+    const opts = {
+      method: 'POST'
+    };
+    fetch('http://localhost:8093/call4', opts)
+      .then(function(response) {
+        assert.deepEqual(response.status, 200);
+        assert.deepEqual(response.headers.get('saray-stubbed'), 'true');
+        return response.text();
+      })
+      .then(function(responseText) {
+        const j = JSON.parse(responseText);
+        assert.ok(j.keyPOST === 'value');
+        done();
       });
   });
 
   it('HTTP POST call to a malformed JSON', function(done) {
-    supertest(app.app)
-      .post('/malformed')
-      .expect(500)
-      .end(done);
+    const opts = {
+      method: 'POST'
+    };
+    fetch('http://localhost:8093/malformed', opts)
+      .then(function(response) {
+        assert.deepEqual(response.status, 500);
+        assert.deepEqual(response.headers.get('saray-stubbed'), 'true');
+        done();
+      });
   });
 
-  it('HTTP OPTIONS call to a wrong address', function(done) {
-    supertest(app.app)
-      .options('/generic/options')
-      .expect(404)
-      .end(done);
+  it('HTTP OPTIONS call to a wrong address', function(done) {    
+    const opts = {
+      method: 'OPTIONS'
+    };
+    fetch('http://localhost:8093/generic/options', opts)
+      .then(function(response) {
+        assert.deepEqual(response.status, 404);
+        assert.deepEqual(response.headers.get('saray-stubbed'), 'true');
+        done();
+      });
   });
 
   it('HTTP OPTIONS call to a right address with JSON stubbed data', function(done) {
-    supertest(app.app)
-      .options('/call')
-      .expect(200)
-      .end(function(err) {
-        assert.ok(!err);
-        return done();
+    const opts = {
+      method: 'OPTIONS'
+    };
+    fetch('http://localhost:8093/call', opts)
+      .then(function(response) {
+        assert.deepEqual(response.status, 200);
+        assert.deepEqual(response.headers.get('saray-stubbed'), 'true');
+        done();
       });
   });
 
   it('HTTP OPTIONS call to a right address with params with JSON stubbed data', function(done) {
-    supertest(app.app)
-      .options('/call2?param1=value1')
-      .expect(200)
-      .end(function(err) {
-        assert.ok(!err);
-        return done();
+    const opts = {
+      method: 'OPTIONS'
+    };
+    fetch('http://localhost:8093/call2?param1=value1', opts)
+      .then(function(response) {
+        assert.deepEqual(response.status, 200);
+        assert.deepEqual(response.headers.get('saray-stubbed'), 'true');
+        done();
       });
   });
 
   it('HTTP OPTIONS call to a right address with params 2 with JSON stubbed data', function(done) {
-    supertest(app.app)
-      .options('/call3?param1=value1')
-      .expect(200)
-      .end(function(err) {
-        assert.ok(!err);
-        return done();
+    const opts = {
+      method: 'OPTIONS'
+    };
+    fetch('http://localhost:8093/call3?param1=value1', opts)
+      .then(function(response) {
+        assert.deepEqual(response.status, 200);
+        assert.deepEqual(response.headers.get('saray-stubbed'), 'true');
+        done();
       });
   });
 
   it('HTTP OPTIONS call to a right address with JS stubbed data', function(done) {
-    supertest(app.app)
-      .options('/call4')
-      .expect(200)
-      .end(function(err) {
-        assert.ok(!err);
-        return done();
+    const opts = {
+      method: 'OPTIONS'
+    };
+    fetch('http://localhost:8093/call4', opts)
+      .then(function(response) {
+        assert.deepEqual(response.status, 200);
+        assert.deepEqual(response.headers.get('saray-stubbed'), 'true');
+        done();
       });
   });
 
   it('HTTP OPTIONS call to a right address with params with JS stubbed data', function(done) {
-    supertest(app.app)
-      .options('/call5?param1=value1')
-      .expect(200)
-      .end(function(err) {
-        assert.ok(!err);
-        return done();
+    const opts = {
+      method: 'OPTIONS'
+    };
+    fetch('http://localhost:8093/call5?param1=value1', opts)
+      .then(function(response) {
+        assert.deepEqual(response.status, 200);
+        assert.deepEqual(response.headers.get('saray-stubbed'), 'true');
+        done();
       });
   });
 
   it('HTTP OPTIONS call to a right address with params 2 with JS stubbed data', function(done) {
-    supertest(app.app)
-      .options('/call6?param1=value1')
-      .expect(200)
-      .end(function(err) {
-        assert.ok(!err);
-        return done();
+    const opts = {
+      method: 'OPTIONS'
+    };
+    fetch('http://localhost:8093/call6?param1=value1', opts)
+      .then(function(response) {
+        assert.deepEqual(response.status, 200);
+        assert.deepEqual(response.headers.get('saray-stubbed'), 'true');
+        done();
       });
   });
 
   it('HTTP GET call to a right address with JS stubbed data to an updated file', function(done) {
-    supertest(app.app)
-      .get('/call6')
-      .expect(200)
-      .end(function(err, response) {
-        assert.ok(!err);
-        assert.ok(response.body.key, 'value');
-        // return done();
+    const opts = {
+      method: 'GET'
+    };
+    fetch('http://localhost:8093/call6', opts)
+      .then(function(response) {
+        assert.deepEqual(response.status, 200);
+        assert.deepEqual(response.headers.get('saray-stubbed'), 'true');
+        return response.text();
+      })
+      .then(function(responseText) {
+        const j = JSON.parse(responseText);
+        assert.ok(j.key === 'value');
       });
 
     const strippedPath = utils.stripRootPath(app.rootPath, '/call6');
@@ -218,79 +286,115 @@ describe('Integration', function() {
     const dataFileContentReplaced = dataFileContent.replace('value', 'value2');
     fs.writeFileSync(filePath, dataFileContentReplaced);
 
-    supertest(app.app)
-      .get('/call6')
-      .expect(200)
-      .end(function(err, response) {
-        assert.ok(!err);
-        assert.equal(response.body.key, 'value2');
+    fetch('http://localhost:8093/call6', opts)
+      .then(function(response) {
+        assert.deepEqual(response.status, 200);
+        assert.deepEqual(response.headers.get('saray-stubbed'), 'true');
+        return response.text();
+      })
+      .then(function(responseText) {
+        const j = JSON.parse(responseText);
+        assert.ok(j.key === 'value2');
 
         const dataFileContentReplaced2 = dataFileContent.replace('value2', 'value');
         fs.writeFileSync(filePath, dataFileContentReplaced2);
-
-        supertest(app.app)
-          .get('/call6')
-          .expect(200)
-          .end(function(err, response) {
-            assert.ok(!err);
-            assert.equal(response.body.key, 'value');
-            return done();
+        
+        fetch('http://localhost:8093/call6', opts)
+          .then(function(response) {
+            assert.deepEqual(response.status, 200);
+            assert.deepEqual(response.headers.get('saray-stubbed'), 'true');
+            return response.text();
+          })
+          .then(function(responseText) {
+            const j = JSON.parse(responseText);
+            assert.ok(j.key === 'value');
+            done();
           });
       });
   });
 
   it('HTTP GET call to a right address with JS stubbed data that must be served first', function(done) {
-    supertest(app.app)
-      .get('/jsFirst')
-      .expect(200)
-      .end(function(err, response) {
-        assert.ok(!err);
-        assert.deepEqual(response.body.key, 'valueJS');
-        return done();
+    const opts = {
+      method: 'GET'
+    };
+    fetch('http://localhost:8093/jsFirst', opts)
+      .then(function(response) {
+        assert.deepEqual(response.status, 200);
+        assert.deepEqual(response.headers.get('saray-stubbed'), 'true');
+        return response.text();
+      })
+      .then(function(responseText) {
+        const j = JSON.parse(responseText);
+        assert.ok(j.key === 'valueJS');
+        done();
       });
   });
 
   it('HTTP GET call to a right address with JS stubbed data that must be served first with parameters', function(done) {
-    supertest(app.app)
-      .get('/jsFirst?param1=valueParam')
-      .expect(200)
-      .end(function(err, response) {
-        assert.ok(!err);
-        assert.deepEqual(response.body.key, 'valueJSvalueParam');
-        return done();
+    const opts = {
+      method: 'GET'
+    };
+    fetch('http://localhost:8093/jsFirst?param1=valueParam', opts)
+      .then(function(response) {
+        assert.deepEqual(response.status, 200);
+        assert.deepEqual(response.headers.get('saray-stubbed'), 'true');
+        return response.text();
+      })
+      .then(function(responseText) {
+        const j = JSON.parse(responseText);
+        assert.ok(j.key === 'valueJSvalueParam');
+        done();
       });
   });
 
   it('HTTP GET call to a right address with JS stubbed data that must be served first with parameters 2', function(done) {
-    supertest(app.app)
-      .get('/jsFirst?param2=value2')
-      .expect(200)
-      .end(function(err, response) {
-        assert.ok(!err);
-        assert.deepEqual(response.body.key, 'valueJS with param 2');
-        return done();
+    const opts = {
+      method: 'GET'
+    };
+    fetch('http://localhost:8093/jsFirst?param2=value2', opts)
+      .then(function(response) {
+        assert.deepEqual(response.status, 200);
+        assert.deepEqual(response.headers.get('saray-stubbed'), 'true');
+        return response.text();
+      })
+      .then(function(responseText) {
+        const j = JSON.parse(responseText);
+        assert.ok(j.key === 'valueJS with param 2');
+        done();
       });
   });
 
   it('HTTP GET call to a right address with parameters with JSON stubbed data and a filesystem name compatible with Windows', function(done) {
-    supertest(app.app)
-      .get('/call7?param1=value1')
-      .expect(200)
-      .end(function(err, response) {
-        assert.ok(!err);
-        assert.deepEqual(response.body.key, 'value windows compatible');
-        return done();
+    const opts = {
+      method: 'GET'
+    };
+    fetch('http://localhost:8093/call7?param1=value1', opts)
+      .then(function(response) {
+        assert.deepEqual(response.status, 200);
+        assert.deepEqual(response.headers.get('saray-stubbed'), 'true');
+        return response.text();
+      })
+      .then(function(responseText) {
+        const j = JSON.parse(responseText);
+        assert.ok(j.key === 'value windows compatible');
+        done();
       });
   });
 
   it('HTTP GET call to a right address with parameters with JS stubbed data and a filesystem name compatible with Windows', function(done) {
-    supertest(app.app)
-      .get('/call8?param1=value1')
-      .expect(200)
-      .end(function(err, response) {
-        assert.ok(!err);
-        assert.deepEqual(response.body.key, 'value windows compatible');
-        return done();
+    const opts = {
+      method: 'GET'
+    };
+    fetch('http://localhost:8093/call8?param1=value1', opts)
+      .then(function(response) {
+        assert.deepEqual(response.status, 200);
+        assert.deepEqual(response.headers.get('saray-stubbed'), 'true');
+        return response.text();
+      })
+      .then(function(responseText) {
+        const j = JSON.parse(responseText);
+        assert.ok(j.key === 'value windows compatible');
+        done();
       });
   });
 });

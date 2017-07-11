@@ -33,8 +33,9 @@
     "saray-with-prefer-api-rootpath-wrong": "node src/index.js --port 8090 --path ./test/data --log saray.log --endpoint http://localhost:9000 --pfer-api --root '/saray/abc'",
     "saray-with-endpoint-dynamic": "node src/index.js --port 8091 --path ./test/data --log saray.log --endpoint http://localhost:8084 --dynpath='_'",
     "saray-with-prefer-api-dynamic": "node src/index.js --port 8092 --path ./test/data --log saray.log --endpoint http://localhost:8084 --pfer-api --dynpath='_'",
+    "saray-vanilla": "node src/index.js --port 8093 --path ./test/data --log saray.log",
     "test-mocha": "./node_modules/.bin/mocha -u exports test/**/*.js",
-    "test": "concurrently \"npm run saray-with-endpoint\" \"npm run saray-with-prefer-api\" \"npm run saray-endpoint-service\" \"npm run saray-with-endpoint-rootpath\" \"npm run saray-with-prefer-api-rootpath\" \"npm run saray-endpoint-service-rootpath\" \"npm run saray-with-endpoint-wrong\" \"npm run saray-with-prefer-api-wrong\" \"npm run saray-with-prefer-api-rootpath-wrong\" \"npm run saray-with-endpoint-dynamic\" \"npm run saray-with-prefer-api-dynamic\" \"npm run test-mocha\" --kill-others --success first"
+    "test": "concurrently \"npm run saray-vanilla\" \"npm run saray-with-endpoint\" \"npm run saray-with-prefer-api\" \"npm run saray-endpoint-service\" \"npm run saray-with-endpoint-rootpath\" \"npm run saray-with-prefer-api-rootpath\" \"npm run saray-endpoint-service-rootpath\" \"npm run saray-with-endpoint-wrong\" \"npm run saray-with-prefer-api-wrong\" \"npm run saray-with-prefer-api-rootpath-wrong\" \"npm run saray-with-endpoint-dynamic\" \"npm run saray-with-prefer-api-dynamic\" \"npm run test-mocha\" --kill-others --success first"
   },
   "dependencies": {
     "body-parser": "^1.17.2",
