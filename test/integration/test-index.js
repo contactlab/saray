@@ -633,14 +633,6 @@ describe('Integration with rootPath', function() {
   });
 
   it('HTTP OPTIONS call to a right address with params with JS stubbed data', function(done) {
-    // supertest(app.app)
-    //   .options('/saray/abc/call5?param1=value1')
-    //   .expect(200)
-    //   .end(function(err) {
-    //     assert.ok(!err);
-    //     return done();
-    //   });
-
     const opts = {
       method: 'OPTIONS'
     };
@@ -653,14 +645,6 @@ describe('Integration with rootPath', function() {
   });
 
   it('HTTP OPTIONS call to a right address with params 2 with JS stubbed data', function(done) {
-    // supertest(app.app)
-    //   .options('/saray/abc/call6?param1=value1')
-    //   .expect(200)
-    //   .end(function(err) {
-    //     assert.ok(!err);
-    //     return done();
-    //   });
-
     const opts = {
       method: 'OPTIONS'
     };
@@ -673,42 +657,6 @@ describe('Integration with rootPath', function() {
   });
 
   it('HTTP GET call to a right address with JS stubbed data to an updated file', function(done) {
-    // supertest(app.app)
-    //   .get('/saray/abc/call6')
-    //   .expect(200)
-    //   .end(function(err, response) {
-    //     assert.ok(!err);
-    //     assert.ok(response.body.key, 'value');
-    //     // return done();
-    //   });
-
-    // const strippedPath = utils.stripRootPath(app.rootPath, '/saray/abc/call6');
-    // const filePath = path.join(app.apiDataPath, strippedPath + '.GET.js');
-    // const dataFile = fs.readFileSync(filePath);
-    // const dataFileContent = dataFile.toString();
-    // const dataFileContentReplaced = dataFileContent.replace('value', 'value2');
-    // fs.writeFileSync(filePath, dataFileContentReplaced);
-
-    // supertest(app.app)
-    //   .get('/saray/abc/call6')
-    //   .expect(200)
-    //   .end(function(err, response) {
-    //     assert.ok(!err);
-    //     assert.equal(response.body.key, 'value2');
-
-    //     const dataFileContentReplaced2 = dataFileContent.replace('value2', 'value');
-    //     fs.writeFileSync(filePath, dataFileContentReplaced2);
-
-    //     supertest(app.app)
-    //       .get('/saray/abc/call6')
-    //       .expect(200)
-    //       .end(function(err, response) {
-    //         assert.ok(!err);
-    //         assert.equal(response.body.key, 'value');
-    //         return done();
-    //       });
-    //   });
-
     const opts = {
       method: 'GET'
     };
@@ -758,15 +706,6 @@ describe('Integration with rootPath', function() {
   });
 
   it('HTTP GET call to a right address with JS stubbed data that must be served first', function(done) {
-    // supertest(app.app)
-    //   .get('/saray/abc/jsFirst')
-    //   .expect(200)
-    //   .end(function(err, response) {
-    //     assert.ok(!err);
-    //     assert.deepEqual(response.body.key, 'valueJS');
-    //     return done();
-    //   });
-
     const opts = {
       method: 'GET'
     };
@@ -784,15 +723,6 @@ describe('Integration with rootPath', function() {
   });
 
   it('HTTP GET call to a right address with JS stubbed data that must be served first with parameters', function(done) {
-    // supertest(app.app)
-    //   .get('/saray/abc/jsFirst?param1=valueParam')
-    //   .expect(200)
-    //   .end(function(err, response) {
-    //     assert.ok(!err);
-    //     assert.deepEqual(response.body.key, 'valueJSvalueParam');
-    //     return done();
-    //   });
-
     const opts = {
       method: 'GET'
     };
@@ -810,15 +740,6 @@ describe('Integration with rootPath', function() {
   });
 
   it('HTTP GET call to a right address with JS stubbed data that must be served first with parameters 2', function(done) {
-    // supertest(app.app)
-    //   .get('/saray/abc/jsFirst?param2=value2')
-    //   .expect(200)
-    //   .end(function(err, response) {
-    //     assert.ok(!err);
-    //     assert.deepEqual(response.body.key, 'valueJS with param 2');
-    //     return done();
-    //   });
-
     const opts = {
       method: 'GET'
     };
@@ -831,6 +752,40 @@ describe('Integration with rootPath', function() {
       .then(function(responseText) {
         const j = JSON.parse(responseText);
         assert.ok(j.key === 'valueJS with param 2');
+        done();
+      });
+  });
+
+  it('HTTP GET call to a right address with parameters with JSON stubbed data and a filesystem name compatible with Windows', function(done) {
+    const opts = {
+      method: 'GET'
+    };
+    fetch('http://localhost:8094/saray/abc/call7?param1=value1', opts)
+      .then(function(response) {
+        assert.deepEqual(response.status, 200);
+        assert.deepEqual(response.headers.get('saray-stubbed'), 'true');
+        return response.text();
+      })
+      .then(function(responseText) {
+        const j = JSON.parse(responseText);
+        assert.ok(j.key === 'value windows compatible');
+        done();
+      });
+  });
+
+  it('HTTP GET call to a right address with parameters with JS stubbed data and a filesystem name compatible with Windows', function(done) {
+    const opts = {
+      method: 'GET'
+    };
+    fetch('http://localhost:8094/saray/abc/call8?param1=value1', opts)
+      .then(function(response) {
+        assert.deepEqual(response.status, 200);
+        assert.deepEqual(response.headers.get('saray-stubbed'), 'true');
+        return response.text();
+      })
+      .then(function(responseText) {
+        const j = JSON.parse(responseText);
+        assert.ok(j.key === 'value windows compatible');
         done();
       });
   });
