@@ -3,13 +3,11 @@
 const bodyParser = require('body-parser');
 const bunyan = require('bunyan');
 const express = require('express');
-const fs = require('fs');
 const path = require('path');
 const process = require('process');
 const program = require('commander');
 const bformat = require('bunyan-format');
 
-const utils = require('./utils');
 const corsMiddleware = require('./middlewares/cors').cors;
 
 const app = express();
@@ -38,37 +36,25 @@ const formatOut = bformat({ outputMode: 'short' });
 const log = bunyan.createLogger({
   name: 'saray',
   streams: [
-    // {
-    //   level: 'info',
-    //   stream: formatOut
-    // },
+    {
+      level: 'info',
+      stream: formatOut
+    },
     {
       path: program.log,
     }
   ]
 });
-module.exports.log = log;
 
 const rootPath = program.root;
-module.exports.rootPath = rootPath;
+const port = program.port;
+const apiDataPath = path.resolve(program.path);
+const dynPath = program.dynpath;
+const timeout = program.timeout;
+const endpoint = program.endpoint;
+const preferApi = program.preferApi;
 
 const sarayRouter = express.Router();
-module.exports.sarayRouter = sarayRouter;
-
-const port = program.port;
-module.exports.port = port;
-
-const apiDataPath = path.resolve(program.path);
-module.exports.apiDataPath = apiDataPath;
-
-const dynPath = program.dynpath;
-module.exports.dynPath = dynPath;
-
-const timeout = program.timeout;
-module.exports.timeout = timeout;
-
-module.exports.endpoint = program.endpoint;
-module.exports.preferApi = program.preferApi;
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({
@@ -79,22 +65,22 @@ app.use(corsMiddleware);
 
 const endpointMiddleware = require('./middlewares/endpoint')(
   log,
-  module.exports.endpoint,
-  module.exports.preferApi,
-  module.exports.apiDataPath,
-  module.exports.rootPath,
-  module.exports.timeout);
+  endpoint,
+  preferApi,
+  apiDataPath,
+  rootPath,
+  timeout);
 app.use(endpointMiddleware);
 
 const main = require('./middlewares/main')(
   log,
-  module.exports.dynPath,
-  module.exports.apiDataPath,
-  module.exports.rootPath
+  dynPath,
+  apiDataPath,
+  rootPath
 );
 sarayRouter.all('/*', main);
 
-app.use(module.exports.rootPath, sarayRouter);
+app.use(rootPath, sarayRouter);
 
 function checkVersion() {
   const version = parseFloat(process.version.replace('v', ''));
@@ -111,15 +97,15 @@ function runExpressServer() {
   app.listen(port, function() {
     log.info(
       'ContactLab API stubber listening on port ' + port +
-      ' reading from path ' + module.exports.apiDataPath +
-      ' using base path ' + module.exports.rootPath
+      ' reading from path ' + apiDataPath +
+      ' using base path ' + rootPath
     );
 
-    if (module.exports.endpoint) {
-      log.info('using endpoint ' + module.exports.endpoint);
+    if (endpoint) {
+      log.info('using endpoint ' + endpoint);
     }
 
-    if (module.exports.preferApi) {
+    if (preferApi) {
       log.info('preferring API endpoint over stub');
     } else {
       log.info('preferring stub over API endpoint');
