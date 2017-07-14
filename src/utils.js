@@ -64,11 +64,32 @@ const encodeFilePath = function(filePath) {
   return path.join(path.dirname(filePath), encodeURIComponent(baseName));
 };
 
+const errorStatusCodesMap = {
+  '200': 404,
+  '408': 408
+};
+
+function handleErrorStatusCode(code) {
+  return errorStatusCodesMap[code.toString()];
+}
+
+function handleErrorMessage(code, extra) {
+  const errorMessageStatusCodeMap = {
+    '404': `Probably this is not the API response you are looking for, missing JSON file for ${extra}`,
+    '408': `Timeout for API call ${extra}`
+  };
+
+  return errorMessageStatusCodeMap[code];
+}
+
 module.exports = {
   allowedMethods: allowedMethods,
   getParamsString: getParamsString,
   getQueryString: getQueryString,
   reallyAllowedMethods: reallyAllowedMethods,
   stripRootPath: stripRootPath,
-  encodeFilePath: encodeFilePath
+  encodeFilePath: encodeFilePath,
+  errorStatusCodesMap: errorStatusCodesMap,
+  handleErrorStatusCode: handleErrorStatusCode,
+  handleErrorMessage: handleErrorMessage
 };
