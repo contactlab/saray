@@ -1,6 +1,7 @@
 #! /usr/bin/env node
 
 const bodyParser = require('body-parser');
+require('body-parser-xml')(bodyParser);
 const bunyan = require('bunyan');
 const express = require('express');
 const fs = require('fs');
@@ -63,6 +64,14 @@ module.exports.endpoint = program.endpoint;
 module.exports.preferApi = program.preferApi;
 
 app.use(bodyParser.json());
+app.use(bodyParser.xml({
+  type: [
+    'text/xml',
+    'application/xml',
+    'application/rss+xml',
+    'application/soap+xml'
+  ]
+}));
 app.use(bodyParser.urlencoded({
   extended: true
 }));
