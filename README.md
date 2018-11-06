@@ -13,6 +13,8 @@
 
 > This is a simple API stubber for testing purposes.
 
+:warning: This project is no longer mantained
+
 ## How to use
 
 The stubber responses are based on a filesystem hierarchy of JS and JSON files, so to
