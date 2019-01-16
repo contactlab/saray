@@ -1,3 +1,5 @@
+# :warning: This project is no longer mantained
+
 <!-- # Saray -->
 
 ![Saray](saray.png)
@@ -12,8 +14,6 @@
 ```
 
 > This is a simple API stubber for testing purposes.
-
-:warning: This project is no longer mantained
 
 ## How to use
 
